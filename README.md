@@ -167,7 +167,7 @@ flowchart TB
 环境：Windows x64 · Python 3.10+ · Node.js 18+。
 
 ```powershell
-git clone https://github.com/<你的账号>/myknowledge.git
+git clone https://github.com/yiwensheng/myknowledge.git
 cd myknowledge
 copy .env.example .env
 # 编辑 .env：填入 OpenAI 兼容的 LLM / Embedding（提问与写作才需要）
