@@ -1,0 +1,4 @@
+{"id": "kw-1", "type": "keyword", "question": "易知 RAG 混合检索", "expect_rel_contains": "notes/", "expect_keyword": "混合检索"}
+{"id": "sem-1", "type": "semantic", "question": "知识库如何进化", "expect_rel_contains": "concepts/", "min_score": 0.01}
+{"id": "refuse-1", "type": "refuse", "question": "xyznonexistent99999", "expect_empty": true}
+{"id": "ctx-1", "type": "keyword", "question": "Contextual 分块", "expect_keyword": "context"}

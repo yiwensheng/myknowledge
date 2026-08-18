@@ -1,0 +1,7 @@
+# 显式可选依赖（不进安装包；开发/专项工具自用）
+# pip install -r requirements-optional.txt
+
+pytesseract>=0.3.10
+imageio-ffmpeg>=0.5.0
+# 截图报告等脚本用，体积大，禁止进用户包
+# playwright

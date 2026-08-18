@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>文件预览 · 易知</title>
+  <script src="/app-static/file-viewer/flyfish-file-viewer-web-full.iife.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      max-width: 100vw;
+      overflow-x: hidden;
+      background: #f3f6fa;
+      color: #0f172a;
+      font-family: "Segoe UI", "Microsoft YaHei UI", sans-serif;
+    }
+    ::-webkit-scrollbar:horizontal {
+      display: none !important;
+      height: 0 !important;
+    }
+    #toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+      background: #ffffff;
+      flex-shrink: 0;
+    }
+    #title { flex: 1; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    button {
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid rgba(15, 23, 42, 0.16);
+      background: #f8fafc;
+      color: #0f172a;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    #viewer-root { flex: 1; min-height: 0; position: relative; background: #fff; }
+    #status {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      font-size: 14px;
+      padding: 24px;
+      text-align: center;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      z-index: 2;
+    }
+    body { display: flex; flex-direction: column; min-height: 0; }
+    .error { color: #dc2626; }
+    .file-viewer-web-host { height: 100%; min-height: 0; }
+    #fallback-panel {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 20px 24px 32px;
+      background: #fff;
+    }
+    #fallback-panel.visible { display: block; }
+    #fallback-panel h2 { margin: 0 0 8px; font-size: 16px; color: #0f172a; }
+    #fallback-panel .hint {
+      margin: 0 0 16px;
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    #fallback-panel .reason {
+      margin: 0 0 16px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #fef2f2;
+      color: #b91c1c;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    #fallback-text {
+      margin: 0;
+      white-space: pre-wrap;
+      font-size: 14px;
+      line-height: 1.65;
+      color: #1e293b;
+      font-family: "Segoe UI", "Microsoft YaHei UI", sans-serif;
+    }
+    #pptx-partial-banner {
+      display: none;
+      flex-shrink: 0;
+      padding: 8px 12px;
+      background: #fffbeb;
+      border-bottom: 1px solid #fcd34d;
+      color: #92400e;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    #pptx-partial-banner.visible { display: block; }
+    .pptx-viewer-shell.yizhi-pptx-partial .pptx-error { display: none !important; }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <span id="title">加载中…</span>
+    <button type="button" id="btn-download">下载</button>
+    <button type="button" id="btn-text-summary" hidden>文字摘要</button>
+    <button type="button" id="btn-open">系统打开</button>
+  </div>
+  <div id="pptx-partial-banner"></div>
+  <div id="viewer-root">
+    <div id="status">正在加载预览组件…</div>
+  </div>
+  <div id="fallback-panel">
+    <h2 id="fallback-title">无法完整渲染此文档</h2>
+    <p class="hint" id="fallback-hint">预览引擎无法完整渲染该文件。下方为已提取的文字摘要；完整版请点「系统打开」用 Office / WPS 查看。</p>
+    <div id="fallback-reason" class="reason"></div>
+    <pre id="fallback-text"></pre>
+  </div>
+  <script>
+    const API = window.location.origin;
+    const FV_BASE = `${API}/app-static/file-viewer/`;
+    const params = new URLSearchParams(location.search);
+    const relPath = params.get("path") || "";
+    const filename = params.get("name") || relPath.split("/").pop() || "文件";
+    const initialPage = parseInt(params.get("page") || "0", 10) || 0;
+    const statusEl = document.getElementById("status");
+    const rootEl = document.getElementById("viewer-root");
+    const fallbackPanel = document.getElementById("fallback-panel");
+    const fallbackTitle = document.getElementById("fallback-title");
+    const fallbackHint = document.getElementById("fallback-hint");
+    const fallbackReason = document.getElementById("fallback-reason");
+    const fallbackText = document.getElementById("fallback-text");
+    let viewerController = null;
+    let fallbackShown = false;
+
+    document.getElementById("title").textContent = filename;
+
+    const OFFICE_TEXT_EXTS = new Set(["ppt", "pptx", "xls", "xlsx"]);
+    if (OFFICE_TEXT_EXTS.has(extOf(filename))) {
+      document.getElementById("btn-text-summary").hidden = false;
+    }
+
+    const MIME_BY_EXT = {
+      pdf: "application/pdf",
+      doc: "application/msword",
+      docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      xls: "application/vnd.ms-excel",
+      xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      ppt: "application/vnd.ms-powerpoint",
+      pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      png: "image/png",
+      jpg: "image/jpeg",
+      jpeg: "image/jpeg",
+      txt: "text/plain",
+      md: "text/markdown",
+      mp3: "audio/mpeg",
+      mp4: "video/mp4",
+    };
+
+    const PRELOAD_BY_EXT = {
+      pdf: "pdf",
+      doc: "word",
+      docx: "word",
+      xls: "spreadsheet",
+      xlsx: "spreadsheet",
+      ppt: "presentation",
+      pptx: "presentation",
+    };
+
+    function extOf(name) {
+      const i = String(name || "").lastIndexOf(".");
+      return i >= 0 ? name.slice(i + 1).toLowerCase() : "";
+    }
+
+    function assetFileUrl(inline) {
+      const q = inline ? "&inline=1" : "";
+      return `${API}/api/assets/file?path=${encodeURIComponent(relPath)}${q}`;
+    }
+
+    async function fetchAssetBuffer() {
+      const res = await fetch(assetFileUrl(true));
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(text || `读取文件失败（HTTP ${res.status}）`);
+      }
+      const buffer = await res.arrayBuffer();
+      const ext = extOf(filename);
+      const type =
+        MIME_BY_EXT[ext] ||
+        res.headers.get("content-type") ||
+        "application/octet-stream";
+      return { buffer, type, ext };
+    }
+
+    async function saveAssetCopy() {
+      const { buffer, type } = await fetchAssetBuffer();
+      const blob = new Blob([buffer], { type });
+      const href = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = href;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(href);
+    }
+
+    document.getElementById("btn-download").addEventListener("click", () => {
+      saveAssetCopy().catch((e) => setStatus(String(e.message || e), true));
+    });
+    document.getElementById("btn-open").addEventListener("click", () => {
+      if (window.yizhiViewer?.openWithSystem) {
+        window.yizhiViewer
+          .openWithSystem(relPath, filename)
+          .then((r) => {
+            if (r?.ok === false) setStatus(String(r.error || "无法用系统打开"), true);
+          })
+          .catch((e) => setStatus(String(e.message || e), true));
+        return;
+      }
+      saveAssetCopy().catch((e) => setStatus(String(e.message || e), true));
+    });
+
+    document.getElementById("btn-text-summary")?.addEventListener("click", () => {
+      const ext = extOf(filename);
+      if (fallbackShown) {
+        showViewerPanel();
+        return;
+      }
+      void showExtractFallback("", ext, true);
+    });
+
+    function showViewerPanel() {
+      fallbackShown = false;
+      fallbackPanel.classList.remove("visible");
+      rootEl.style.display = "";
+      statusEl.style.display = "none";
+      document.getElementById("btn-text-summary").textContent = "文字摘要";
+    }
+
+    function queryAllDeep(root, selector) {
+      const out = [];
+      const walk = (node) => {
+        if (!node) return;
+        if (node.querySelectorAll) {
+          for (const el of node.querySelectorAll(selector)) out.push(el);
+          for (const el of node.querySelectorAll("*")) {
+            if (el.shadowRoot) walk(el.shadowRoot);
+          }
+        }
+      };
+      walk(root);
+      return out;
+    }
+
+    function countRenderedPptxSlides(mount) {
+      const slots = queryAllDeep(mount, ".flyfish-pptx-slide-slot");
+      const filled = slots.filter((s) => s.innerHTML.trim().length > 0);
+      if (filled.length) return filled.length;
+      const indexed = queryAllDeep(mount, "[data-slide-index]");
+      if (indexed.length) return indexed.length;
+      const contents = queryAllDeep(mount, ".flyfish-pptx-content");
+      for (const content of contents) {
+        if (content.children.length > 0) return content.children.length;
+      }
+      return 0;
+    }
+
+    /** 库遇单页解析失败会全屏报错，但已渲染页仍在 DOM；降级为顶栏提示并允许继续浏览 */
+    function enablePptxPartialPreview(mount) {
+      const banner = document.getElementById("pptx-partial-banner");
+      let handled = false;
+      const timer = setInterval(() => {
+        if (handled) {
+          clearInterval(timer);
+          return;
+        }
+        const errors = queryAllDeep(mount, ".pptx-error").filter((e) => !e.hidden);
+        if (!errors.length) return;
+        const slideCount = countRenderedPptxSlides(mount);
+        if (slideCount < 1) return;
+
+        handled = true;
+        clearInterval(timer);
+        const errText =
+          errors[0].querySelector("p")?.textContent?.trim() ||
+          errors[0].textContent?.trim().replace(/\s+/g, " ") ||
+          "";
+        queryAllDeep(mount, ".pptx-viewer-shell").forEach((shell) => {
+          shell.classList.add("yizhi-pptx-partial");
+        });
+        banner.textContent = `已成功渲染 ${slideCount} 页；后续幻灯片含复杂图表/布局，预览引擎无法解析。${errText.replace(/^PPTX预览失败/, "").trim()}`;
+        banner.classList.add("visible");
+        statusEl.style.display = "none";
+      }, 400);
+      setTimeout(() => clearInterval(timer), 120000);
+    }
+
+    function setStatus(msg, isError) {
+      statusEl.className = isError ? "error" : "";
+      statusEl.textContent = msg;
+      statusEl.style.display = "flex";
+    }
+
+    function fallbackCopy(ext) {
+      if (ext === "pptx" || ext === "ppt") {
+        return {
+          title: "演示文稿文字摘要",
+          hint: "以下为从 PPT 提取的纯文字，不含版式与图片。完整版请点「系统打开」。",
+        };
+      }
+      if (ext === "xlsx" || ext === "xls") {
+        return {
+          title: "表格文字摘要",
+          hint: "以下为从 Excel 提取的纯文字，不含格式与公式。完整版请点「系统打开」。",
+        };
+      }
+      return {
+        title: "文档文字摘要",
+        hint: "以下为提取的纯文字。完整版请点「系统打开」。",
+      };
+    }
+
+    async function showExtractFallback(reason, ext, manual = false) {
+      if (fallbackShown) return;
+      fallbackShown = true;
+      const copy = fallbackCopy(ext);
+      fallbackTitle.textContent = copy.title;
+      fallbackHint.textContent = copy.hint;
+      statusEl.style.display = "none";
+      rootEl.style.display = "none";
+      fallbackPanel.classList.add("visible");
+      fallbackReason.hidden = !reason;
+      fallbackReason.textContent = reason || "";
+      fallbackText.textContent = "正在加载文字摘要…";
+      document.getElementById("btn-text-summary").textContent = "返回预览";
+      try {
+        const res = await fetch(
+          `${API}/api/assets/extract-text?path=${encodeURIComponent(relPath)}`
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        fallbackText.textContent = data.text || "（未能提取文字内容）";
+      } catch (e) {
+        fallbackText.textContent = `文字摘要加载失败：${e.message || e}`;
+      }
+      if (!manual && reason) {
+        /* 保留 reason 供用户知晓预览失败原因 */
+      }
+    }
+
+    let workerPatchInstalled = false;
+
+    /** sheet.worker.js 为 classic bundle；File-Viewer 默认 type:module 会导致 XLSX 有格无字 */
+    function patchClassicWorkerBundles() {
+      if (workerPatchInstalled) return;
+      workerPatchInstalled = true;
+      const NativeWorker = window.Worker;
+      window.Worker = function PatchedWorker(url, options) {
+        const urlStr = String(url);
+        const forceClassic =
+          options?.type === "module" &&
+          (classicWorkerUrls.has(urlStr) || /sheet\.worker\.js/i.test(urlStr));
+        if (forceClassic) {
+          return new NativeWorker(urlStr);
+        }
+        return new NativeWorker(urlStr, options);
+      };
+      window.Worker.prototype = NativeWorker.prototype;
+    }
+
+    function viewerOptions() {
+      return {
+        theme: "light",
+        locale: "zh-CN",
+        styleIsolation: "none",
+        toolbar: { position: "bottom-right" },
+      };
+    }
+
+    const workerBlobCache = new Map();
+    const classicWorkerUrls = new Set();
+
+    async function workerBlobUrl(relativePath, { forceClassic = false } = {}) {
+      if (workerBlobCache.has(relativePath)) return workerBlobCache.get(relativePath);
+      const res = await fetch(`${FV_BASE}${relativePath}`);
+      if (!res.ok) {
+        throw new Error(`无法加载预览引擎 ${relativePath}（HTTP ${res.status}）`);
+      }
+      const data = await res.arrayBuffer();
+      const blob = new Blob([data], { type: "text/javascript" });
+      const url = URL.createObjectURL(blob);
+      workerBlobCache.set(relativePath, url);
+      if (forceClassic) classicWorkerUrls.add(url);
+      return url;
+    }
+
+    async function buildViewerOptions(ext) {
+      const opts = viewerOptions();
+      if (ext === "pdf") {
+        opts.pdf = {
+          workerUrl: await workerBlobUrl("vendor/pdf/pdf.worker.mjs"),
+          cMapUrl: `${FV_BASE}vendor/pdf/cmaps/`,
+          wasmUrl: `${FV_BASE}vendor/pdf/wasm/`,
+          standardFontDataUrl: `${FV_BASE}vendor/pdf/standard_fonts/`,
+        };
+      } else if (ext === "doc" || ext === "docx") {
+        opts.docx = {
+          workerUrl: `${FV_BASE}vendor/docx/docx.worker.js`,
+          workerJsZipUrl: `${FV_BASE}vendor/docx/jszip.min.js`,
+        };
+      } else if (ext === "ppt" || ext === "pptx") {
+        opts.presentation = {
+          workerUrl: await workerBlobUrl("vendor/pptx/pptx.worker.js"),
+          workerType: "classic",
+        };
+      } else if (ext === "xls" || ext === "xlsx") {
+        opts.spreadsheet = {
+          workerUrl: await workerBlobUrl("vendor/xlsx/sheet.worker.js", { forceClassic: true }),
+          worker: "auto",
+        };
+      }
+      return opts;
+    }
+
+    function jumpToPage(pageNum) {
+      if (!pageNum || pageNum < 1) return;
+      const tryScroll = () => {
+        const pages = queryAllDeep(rootEl, "[data-page-number]");
+        const target = pages.find((el) => String(el.getAttribute("data-page-number")) === String(pageNum));
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+          return true;
+        }
+        const labeled = queryAllDeep(rootEl, `[aria-label*="第 ${pageNum} 页"], [aria-label*="Page ${pageNum}"]`);
+        if (labeled[0]) {
+          labeled[0].scrollIntoView({ behavior: "smooth", block: "start" });
+          return true;
+        }
+        return false;
+      };
+      if (!tryScroll()) {
+        setTimeout(tryScroll, 600);
+        setTimeout(tryScroll, 1500);
+      }
+    }
+
+    function onViewerEvent(ev) {
+      if (ev?.type === "load-complete") {
+        statusEl.style.display = "none";
+        if (initialPage > 0) {
+          jumpToPage(initialPage);
+        }
+      }
+      if (ev?.type === "viewer-error" || ev?.type === "error") {
+        const err = ev.detail?.error || ev.payload?.error || ev.error;
+        const msg = String(err?.message || err || "预览失败");
+        setStatus(msg, true);
+      }
+    }
+
+    async function mountViewer(buffer, ext) {
+      const fv = window.FlyfishFileViewerWebFull;
+      if (!fv?.mountViewer) {
+        throw new Error("本地预览组件未加载。请在 electron 目录执行 npm install && npm run sync-file-viewer");
+      }
+      patchClassicWorkerBundles();
+      fv.setDefaultFullAssetBaseUrl(FV_BASE);
+
+      const preloadKey = PRELOAD_BY_EXT[ext];
+      if (preloadKey && fv.preloadFullRenderer) {
+        setStatus(`正在加载 ${ext.toUpperCase()} 预览引擎…`);
+        await fv.preloadFullRenderer(preloadKey);
+      }
+
+      const mount = document.createElement("div");
+      mount.style.height = "100%";
+      mount.style.width = "100%";
+      rootEl.appendChild(mount);
+
+      viewerController = fv.mountViewer(mount, {
+        buffer,
+        filename,
+        // 注意：mountViewer 的 type 是扩展名（如 pptx），不是 MIME
+        options: await buildViewerOptions(ext),
+        onEvent: onViewerEvent,
+      });
+
+      if (ext === "ppt" || ext === "pptx") {
+        enablePptxPartialPreview(mount);
+      }
+    }
+
+    async function init() {
+      if (!relPath) {
+        setStatus("缺少文件路径参数", true);
+        return;
+      }
+      try {
+        setStatus("正在读取文件…");
+        const { buffer, type, ext } = await fetchAssetBuffer();
+        setStatus("正在渲染预览…");
+        await mountViewer(buffer, ext);
+      } catch (e) {
+        setStatus(String(e.message || e), true);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

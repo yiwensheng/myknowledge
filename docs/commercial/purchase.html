@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>易知 · 购买与订阅</title>
+  <style>
+    :root { --fg: #1a1a1a; --muted: #666; --accent: #2563eb; --bg: #f8fafc; --card: #fff; }
+    * { box-sizing: border-box; }
+    body { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; margin: 0; background: var(--bg); color: var(--fg); line-height: 1.7; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 32px 20px 48px; }
+    h1 { font-size: 1.75rem; margin: 0 0 8px; }
+    .sub { color: var(--muted); margin-bottom: 28px; }
+    .card { background: var(--card); border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+    .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+    @media (max-width: 520px) { .plans { grid-template-columns: 1fr; } }
+    .plan { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; text-align: center; }
+    .plan strong { display: block; font-size: 1.25rem; color: var(--accent); }
+    ol { padding-left: 1.25rem; }
+    a { color: var(--accent); }
+    footer { margin-top: 32px; font-size: .9rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>易知</h1>
+    <p class="sub">个人知识库 · 本地存储 · 智能问答 · 订阅制软件</p>
+
+    <div class="card">
+      <h2>套餐价格</h2>
+      <p>新用户安装后享 <strong>30 天免费试用</strong>（按自然日计算，与是否使用无关）；第 31 天起需订阅。</p>
+      <div class="plans">
+        <div class="plan"><strong>19 元</strong>月付 / 30 天</div>
+        <div class="plan"><strong>99 元</strong>年付 / 365 天</div>
+        <div class="plan"><strong>199 元</strong>终身 / 永久</div>
+      </div>
+      <p><small>价格以软件内激活页为准。订阅含软件使用权与更新，<strong>不含</strong>大模型 API 费用。</small></p>
+    </div>
+
+    <div class="card">
+      <h2>如何购买</h2>
+      <ol>
+        <li>下载并安装易知（Windows 便携包或安装包）</li>
+        <li>首次启动配置大模型 API Key（设置 → 大模型）</li>
+        <li>安装后自动开始 30 天试用；试用结束后在「激活易知」页订阅</li>
+        <li>在「激活易知」页选择月付、年付或终身版，微信扫码支付</li>
+        <li>支付成功后自动解锁；也可使用客服发放的激活码</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>订阅包含</h2>
+      <ul>
+        <li>易知桌面软件全部功能（导入、问答、写作、播客等）</li>
+        <li>版本更新（关于 → 检查更新）</li>
+        <li>一机一码；换机每年 1 次自助解绑</li>
+      </ul>
+      <p>笔记与知识库<strong>全部保存在您的电脑</strong>，不上传内容。详见 <a href="faq.html">常见问题</a>。</p>
+    </div>
+
+    <div class="card">
+      <h2>获取软件</h2>
+      <p>请从官方渠道获取最新安装包（公众号 / 客服）。安装后授权服务器：<code>https://www.yzwhysxx.cn/license</code></p>
+    </div>
+
+    <footer>
+      <p>易文胜 · 易知 · <a href="faq.html">FAQ</a> · <a href="changelog.html">更新记录</a></p>
+    </footer>
+  </div>
+</body>
+</html>

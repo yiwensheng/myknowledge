@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>易知</title>
+  <link rel="stylesheet" href="splash.css" />
+</head>
+<body>
+  <div class="splash">
+    <div class="glow"></div>
+    <div class="ring ring-a"></div>
+    <div class="ring ring-b"></div>
+    <img class="logo" src="assets/icon-256.png" width="96" height="96" alt="" />
+    <h1>易知</h1>
+    <p class="tagline">个人知识库 · 有据问答</p>
+    <p id="status" class="status">正在启动…</p>
+    <div class="bar"><span id="bar-fill"></span></div>
+  </div>
+  <script>
+    (function () {
+      var statusEl = document.getElementById("status");
+      var barEl = document.getElementById("bar-fill");
+      var pct = 8;
+      var hints = [
+        "正在连接本地服务…",
+        "正在检查 DocuBrowser…",
+        "正在准备知识库…",
+        "正在加载 AI 能力…",
+        "马上就好…",
+      ];
+      var hintIdx = 0;
+      setInterval(function () {
+        pct = Math.min(92, pct + Math.random() * 6);
+        barEl.style.width = pct + "%";
+        if (pct > hintIdx * 18 && hintIdx < hints.length) {
+          statusEl.textContent = hints[hintIdx++];
+        }
+      }, 450);
+      window.setSplashStatus = function (msg) {
+        if (msg) statusEl.textContent = msg;
+      };
+    })();
+  </script>
+</body>
+</html>

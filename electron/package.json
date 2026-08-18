@@ -1,0 +1,63 @@
+{
+  "name": "myknowledge",
+  "version": "3.0.2",
+  "description": "易知 Electron GUI",
+  "main": "main.js",
+  "scripts": {
+    "postinstall": "node scripts/sync-file-viewer.mjs && node scripts/sync-toastui-editor.mjs && node scripts/sync-d3.mjs",
+    "sync-file-viewer": "node scripts/sync-file-viewer.mjs",
+    "sync-toastui-editor": "node scripts/sync-toastui-editor.mjs",
+    "sync-d3": "node scripts/sync-d3.mjs",
+    "build": "npm run sync-file-viewer && npm run sync-toastui-editor && npm run sync-d3",
+    "start": "electron .",
+    "dev": "electron .",
+    "dist": "electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "com.yiwensheng.yizhi",
+    "productName": "易知",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist/**"
+    ],
+    "extraResources": [
+      {
+        "from": "../",
+        "to": "backend",
+        "filter": [
+          "**/*",
+          "!electron/**",
+          "!license-server/**",
+          "!.git/**",
+          "!dist/**",
+          "!inbox/**",
+          "!sources/**",
+          "!notes/**"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Yizhi-Setup-${version}.exe"
+    }
+  },
+  "dependencies": {
+    "electron": "^33.2.0"
+  },
+  "devDependencies": {
+    "@file-viewer/web-full": "^2.1.23",
+    "@toast-ui/editor": "^3.2.2",
+    "d3": "^7.9.0",
+    "marked": "^18.0.6"
+  }
+}

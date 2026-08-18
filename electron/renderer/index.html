@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>易知</title>
+  <link rel="icon" type="image/png" href="../assets/icon.png" />
+  <script>
+    (function () {
+      var theme = localStorage.getItem("myk-theme") || "dark";
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="vendor/toastui-editor/toastui-editor.css" />
+  <link rel="stylesheet" href="vendor/toastui-editor/toastui-editor-dark.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="brand">
+      <img class="brand-icon" src="../assets/icon.png" width="22" height="22" alt="" />
+      <h1>易知</h1>
+      <span id="license-banner" class="license-banner hidden" role="status" aria-live="polite"></span>
+    </div>
+    <div class="header-actions">
+      <div class="theme-switch" role="group" aria-label="界面主题">
+        <button type="button" class="theme-btn" data-theme="light">浅色</button>
+        <button type="button" class="theme-btn" data-theme="dark">深色</button>
+      </div>
+      <div id="task-center-wrap" class="task-center-wrap">
+        <button type="button" id="btn-task-center" class="task-center-btn hidden" aria-expanded="false">任务</button>
+        <div id="task-center-dropdown" class="task-center-dropdown hidden" role="region" aria-label="后台任务"></div>
+      </div>
+      <span id="upload-job-banner" class="upload-job-banner hidden" aria-hidden="true"></span>
+      <span id="linked-index-job-banner" class="linked-index-job-banner hidden" aria-hidden="true"></span>
+      <span id="url-job-banner" class="url-job-banner hidden" aria-hidden="true"></span>
+      <span id="status" class="status">正在连接…</span>
+      <button id="btn-service-loop-show" class="link-btn hidden" type="button" title="展开本周服务进度">服务进度</button>
+      <button id="btn-persona" class="link-btn" type="button">人设</button>
+      <button id="btn-settings" class="link-btn" type="button">设置</button>
+      <button id="btn-about" class="link-btn" type="button">关于</button>
+      <button id="btn-feedback" class="link-btn header-feedback" type="button">反馈</button>
+    </div>
+  </header>
+  <div id="reconnect-banner" class="reconnect-banner hidden" role="alert">
+    <span>未连上后台服务</span>
+    <button type="button" id="btn-reconnect" class="primary">重试连接</button>
+  </div>
+  <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+  <nav class="tabs" role="tablist" aria-label="主功能">
+    <button class="tab active" role="tab" aria-selected="true" aria-controls="panel-ask" data-tab="ask">提问</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-query" data-tab="query">查询</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-deduce" data-tab="deduce">推演</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-list" data-tab="list">笔记</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-produce" data-tab="produce">写文章</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-manage" data-tab="manage">导入资料</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-library" data-tab="library">资料库</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-history" data-tab="history">历史</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-memory" data-tab="memory">记忆与进化</button>
+  </nav>
+  <main>
+    <section id="panel-ask" class="panel active">
+      <div id="ask-continuity-bar" class="continuity-bar" aria-live="polite">
+        <button type="button" id="btn-continuity-toggle" class="continuity-toggle" aria-expanded="true" title="折叠/展开">▾</button>
+        <div id="ask-continuity-body" class="continuity-body">
+          <p id="ask-continuity-text" class="continuity-text hint">正在读取续航信息…</p>
+          <p id="ask-fortune-slip" class="fortune-slip hint hidden" aria-live="polite"></p>
+          <div class="row continuity-actions">
+            <button type="button" id="btn-continuity-continue" class="primary">继续上次</button>
+            <button type="button" id="btn-continuity-new">新开对话</button>
+            <button type="button" id="btn-open-fortune" class="hidden" title="查看今日知签与库运势">今日知签</button>
+            <button type="button" id="btn-open-memory-panel">记忆与进化</button>
+          </div>
+        </div>
+      </div>
+      <textarea id="ask-input" rows="3" placeholder="输入你的问题（只根据知识库里的内容回答，没有依据不会乱说）…"></textarea>
+      <div class="row ask-options">
+        <label class="inline-check"><input type="checkbox" id="ask-remember" checked /> 记住刚才的对话</label>
+        <label class="inline-check"><input type="checkbox" id="ask-archive" checked /> 答得好就自动存进知识库</label>
+        <label class="inline-check"><input type="checkbox" id="ask-scope-enabled" /> 限定资料范围</label>
+        <button id="btn-ask-scope" type="button" disabled>选择资料</button>
+        <span class="ask-folder-label">资料夹</span>
+        <div id="ask-folder-chips" class="folder-chips-wrap"></div>
+        <button id="btn-new-session" type="button">新对话</button>
+        <button id="btn-ask" class="primary">提问</button>
+      </div>
+      <p id="ask-scope-summary" class="hint hidden"></p>
+      <p id="ask-session-hint" class="hint"></p>
+      <p id="ask-empty-hint" class="hint ask-empty-hint">输入问题后点击「提问」；仅根据知识库内容回答，无依据时会明确拒答。</p>
+      <div id="ask-output" class="answer-html" aria-live="polite"></div>
+      <div id="ask-feedback-bar" class="ask-feedback-bar hidden">
+        <button id="btn-ask-write-rule" type="button">将纠错写入输出规则</button>
+        <span id="ask-feedback-hint" class="hint"></span>
+      </div>
+    </section>
+    <section id="panel-query" class="panel">
+      <div class="row">
+        <input id="query-input" placeholder="输入要搜的内容" />
+        <label><input type="checkbox" id="query-rag" checked /> 按意思找</label>
+        <button id="btn-query">查询</button>
+      </div>
+      <div id="query-results" class="results"></div>
+      <div id="query-pager" class="pager"></div>
+    </section>
+    <section id="panel-deduce" class="panel">
+      <p class="hint">基于本地知识库推演可能走向；结论须有依据，结果默认保存为笔记。</p>
+      <div class="deduce-form-group">
+        <textarea id="deduce-input" rows="1" placeholder="用自然语言描述推演问题，例如：根据工作记录，后续有哪些重点？"></textarea>
+        <button id="btn-deduce" class="primary" type="button">开始推演</button>
+        <button id="btn-deduce-download" type="button" disabled>下载</button>
+      </div>
+      <div class="deduce-result" id="deduce-result">
+        <div class="deduce-result-graph-wrap">
+          <div class="deduce-result-section-label">关系图</div>
+          <div id="deduce-graph-host" class="deduce-graph-host" aria-label="推演关系图"></div>
+        </div>
+        <div class="deduce-result-report-wrap">
+          <div class="deduce-result-section-label">推演报告</div>
+          <div id="deduce-output" class="deduce-result-body answer-html" aria-live="polite">
+            <p class="hint">推演报告与关系图解读将显示在这里…</p>
+          </div>
+        </div>
+      </div>
+      <p id="deduce-saved-hint" class="hint hidden"></p>
+    </section>
+    <section id="panel-list" class="panel">
+      <div class="row notes-toolbar">
+        <div class="notes-view-toggle" role="tablist" aria-label="笔记视图">
+          <button type="button" class="notes-view-btn active" data-notes-view="timeline">时间线</button>
+          <button type="button" class="notes-view-btn" data-notes-view="editor">编辑器</button>
+        </div>
+        <button id="btn-refresh-list" type="button">刷新</button>
+      </div>
+      <div id="notes-timeline-view" class="notes-timeline-view">
+        <div class="memo-capture">
+          <div id="memo-editor-host" class="yizhi-rich-editor-host memo-editor-host"></div>
+          <div id="memo-folder-chips" class="folder-chips-wrap"></div>
+          <button id="btn-memo-save" class="primary" type="button">保存</button>
+        </div>
+        <div class="notes-timeline-scroll">
+          <div class="memo-date-bar">
+            <label class="memo-date-label" for="memo-date-picker">日期</label>
+            <input type="date" id="memo-date-picker" />
+            <button id="btn-memo-today" type="button">今天</button>
+            <span id="memo-date-summary" class="memo-date-summary hint"></span>
+          </div>
+          <div id="memo-tag-filter" class="memo-tag-filter"></div>
+          <div id="memo-timeline" class="memo-timeline" aria-live="polite"></div>
+          <div id="memo-pager" class="pager"></div>
+        </div>
+      </div>
+      <div id="notes-editor-view" class="notes-editor-view hidden">
+        <div class="row">
+          <button id="btn-new-page" type="button">新建</button>
+          <button id="btn-save-page" class="primary" type="button">保存</button>
+          <button id="btn-del-page" class="danger" type="button">删除</button>
+          <select id="filter-type">
+            <option value="">全部分类</option>
+            <option value="concept">概念</option>
+            <option value="entity">人物与工具</option>
+            <option value="source">外部资料</option>
+            <option value="comparison">对比分析</option>
+            <option value="note">笔记</option>
+          </select>
+        </div>
+        <div class="split">
+          <aside class="split-sidebar">
+            <ul id="page-list" class="page-list"></ul>
+            <div id="page-list-pager" class="pager"></div>
+          </aside>
+          <div class="split-main editor">
+            <div class="row meta">
+              <select id="edit-type">
+                <option value="note">笔记</option>
+                <option value="concept">概念</option>
+                <option value="entity">人物与工具</option>
+                <option value="source">外部资料</option>
+                <option value="comparison">对比分析</option>
+              </select>
+              <select id="edit-status">
+                <option value="draft">草稿</option>
+                <option value="refined">已整理</option>
+                <option value="archived">已归档</option>
+              </select>
+              <input id="edit-title" placeholder="标题" />
+              <div id="note-folder-chips" class="folder-chips-wrap"></div>
+            </div>
+            <div id="edit-body-host" class="yizhi-rich-editor-host note-editor-host"></div>
+            <div id="asset-link" class="asset-link"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="panel-produce" class="panel">
+      <textarea id="produce-input" rows="2" placeholder="写作主题，例如：2026 年教学质量改进"></textarea>
+      <div class="row produce-toolbar">
+        <label class="produce-field">
+          <span>文章体例</span>
+          <select id="produce-genre"></select>
+        </label>
+        <button id="btn-produce" class="primary" type="button">开始写</button>
+        <button id="btn-service-loop-templates" type="button" title="教师/考研/自媒体/职场/一人公司">场景模板</button>
+        <button id="btn-produce-podcast" type="button" class="hidden">合成播客音频</button>
+        <span id="produce-podcast-hint" class="hint produce-podcast-hint hidden" aria-live="polite"></span>
+        <button id="btn-produce-docx" type="button" disabled>下载 Word</button>
+      </div>
+      <div id="produce-podcast-dock" class="produce-podcast-dock hidden" aria-live="polite"></div>
+      <textarea id="produce-brief" class="produce-brief" rows="2" placeholder="补充要求（可选）：读者是谁、侧重点、必须包含的章节等"></textarea>
+      <div class="row produce-options">
+        <label class="inline-check" title="启用后写入写作提示：每次回答都要运用第一性原理，并进行对抗式审查">
+          <input type="checkbox" id="produce-first-principles" />
+          第一性原理与对抗式审查
+        </label>
+      </div>
+      <div id="produce-ritual-box" class="produce-ritual-box hidden" aria-live="polite">
+        <p class="hint produce-ritual-title">今日可归档 <span class="muted">（设置中开启；勾齐仅作提醒，不拦截定稿）</span></p>
+        <div id="produce-ritual-checks" class="produce-ritual-checks"></div>
+        <p id="produce-ritual-stamp" class="produce-ritual-stamp hint hidden">✓ 今日可归档</p>
+      </div>
+      <div id="produce-revise-bar" class="produce-revise-bar hidden">
+        <textarea id="produce-revise-input" class="produce-revise-input" rows="2" placeholder="改稿要求：例如缩短第二段、语气更正式、补充某方面…"></textarea>
+        <div class="row produce-revise-actions">
+          <label class="inline-check"><input type="checkbox" id="produce-revise-rag" /> 改稿时重新参考知识库</label>
+          <button id="btn-produce-revise" type="button">按要求修改</button>
+          <button id="btn-produce-finalize" type="button" class="primary">确认定稿</button>
+        </div>
+        <p id="produce-finalize-meta" class="hint produce-finalize-meta hidden" aria-live="polite"></p>
+      </div>
+      <div id="produce-confirm-panel" class="produce-confirm-panel hidden" aria-label="待人工确认"></div>
+      <div id="produce-editor-host" class="produce-editor-host hidden" aria-label="文章草稿编辑"></div>
+      <div id="produce-output" class="produce-html answer-html" aria-live="polite">
+        <p class="hint">写好的内容会显示在这里；生成后可直接修改，或填写改稿要求让 AI 修改，满意后再定稿入库。</p>
+      </div>
+    </section>
+    <section id="panel-manage" class="panel">
+      <div id="global-job-panel" class="global-job-panel hidden" role="status" aria-live="polite">
+        <span id="global-job-panel-text"></span>
+        <div class="global-job-progress"><span id="global-job-panel-fill"></span></div>
+      </div>
+      <div class="manage-tabs row" role="tablist" aria-label="导入资料视图">
+        <button type="button" class="manage-tab active" data-manage-view="import" role="tab" aria-selected="true">导入</button>
+        <button type="button" class="manage-tab" data-manage-view="drafts" role="tab" aria-selected="false">待整理</button>
+        <button type="button" class="manage-tab" data-manage-view="linked" role="tab" aria-selected="false">外联目录</button>
+        <button type="button" class="manage-tab" data-manage-view="assets" role="tab" aria-selected="false">已导入文件</button>
+      </div>
+      <div id="manage-view-import" class="manage-view" role="tabpanel">
+        <p class="hint manage-view-hint">支持 PDF、Word、PPT、Excel、图片、音视频等。把文件放进「待处理」文件夹，或在此上传 / 粘贴网页链接，系统会自动整理并加入问答检索。</p>
+        <div class="row url-row">
+          <input type="url" id="url-input" placeholder="粘贴网页或 B 站视频地址，例如 https://..." />
+          <label class="inline-check"><input type="checkbox" id="url-force" /> 重新抓取（忽略已保存）</label>
+          <button id="btn-url" class="primary" data-busy-scope="url" data-busy-text="抓取中…" data-default-text="保存网页">保存网页</button>
+          <button id="btn-open-text-import" type="button">粘贴文本</button>
+        </div>
+        <div id="url-job-status" class="url-job-status hidden" aria-live="polite">
+          <span id="url-job-status-text" class="url-job-status-text"></span>
+          <div class="url-job-progress"><span id="url-job-progress-fill"></span></div>
+        </div>
+        <div class="row">
+          <input type="file" id="upload-file" multiple />
+          <button id="btn-upload" class="primary" data-busy-scope="upload" data-busy-text="上传中…" data-default-text="上传文件">上传文件</button>
+        </div>
+        <section class="workflows-section">
+          <h3>工作流</h3>
+          <p class="hint">下方卡片可一键运行易知内置任务。展开「添加自定义工作流」可保存常用快捷方式（自定义名称 + 预填 URL/问题），保存后会出现在卡片网格中，点「运行」即可。</p>
+          <div id="workflow-grid" class="workflow-grid"></div>
+          <details class="workflow-add-panel">
+            <summary>添加自定义工作流</summary>
+            <div class="row workflow-add-form">
+              <input id="workflow-custom-label" type="text" placeholder="名称，如：每日整理 inbox" />
+              <select id="workflow-custom-skill"></select>
+              <input id="workflow-custom-param" type="text" placeholder="可选默认参数（URL 或问题）" />
+              <button id="btn-workflow-add" type="button" class="primary">保存</button>
+            </div>
+          </details>
+          <pre id="workflow-log" class="output workflow-log hidden"></pre>
+        </section>
+        <pre id="manage-log" class="output"></pre>
+      </div>
+      <div id="manage-view-drafts" class="manage-view hidden" role="tabpanel">
+        <section class="maintenance-section maintenance-section-tab">
+          <p id="maintenance-meta" class="hint">加载中…</p>
+          <div class="row maintenance-toolbar">
+            <label class="maintenance-select-all-label">
+              <input type="checkbox" id="maintenance-select-all" /> 全选本页
+            </label>
+            <button id="btn-maintenance-refine-selected" type="button" class="primary">标为已整理（选中）</button>
+            <button id="btn-maintenance-refine-all" type="button">全部草稿标为已整理</button>
+          </div>
+          <ul id="maintenance-draft-list" class="page-list maintenance-list"></ul>
+        </section>
+        <p class="hint">草稿需人工审阅后标为「已整理」；也可点「打开编辑」进入笔记编辑器修改正文与链接。</p>
+      </div>
+      <div id="manage-view-linked" class="manage-view hidden" role="tabpanel">
+        <p class="hint">资料夹请在右上角「设置」中增删改；下方可为外联目录勾选所属资料夹。</p>
+        <section class="linked-dirs-section">
+          <p class="hint">指定任意本地文件夹，易知<strong>只读索引、不复制</strong>其中的文档到 RAG；文件仍留在原处。添加后自动入库，后续变更会按设置自动刷新检索库。</p>
+          <div class="row linked-dirs-toolbar">
+            <input id="linked-dir-input" type="text" placeholder="例如 D:\公司文档\参考" />
+            <button id="btn-linked-dir-browse" type="button">浏览…</button>
+            <button id="btn-linked-dir-add" type="button" class="primary" data-busy-scope="linked-add" data-busy-text="添加中…" data-default-text="添加目录">添加目录</button>
+            <button id="btn-linked-dir-reindex" type="button" data-busy-scope="linked-reindex" data-busy-text="提交中…" data-default-text="刷新外联索引">刷新外联索引</button>
+          </div>
+          <div class="linked-dirs-table-wrap">
+            <table class="library-table linked-dirs-table" id="linked-dirs-table">
+              <thead>
+                <tr>
+                  <th>目录</th>
+                  <th class="col-folders">资料夹</th>
+                  <th class="col-count">可索引文件</th>
+                  <th class="col-time">上次索引</th>
+                  <th class="col-ops">操作</th>
+                </tr>
+              </thead>
+              <tbody id="linked-dirs-tbody"></tbody>
+            </table>
+          </div>
+          <p id="linked-dirs-meta" class="hint"></p>
+        </section>
+      </div>
+      <div id="manage-view-assets" class="manage-view hidden" role="tabpanel">
+        <p class="hint">已上传并提取的原始文件；可在「资料库」中预览与溯源。</p>
+        <ul id="asset-list" class="page-list manage-asset-list"></ul>
+        <div id="asset-list-pager" class="pager"></div>
+      </div>
+    </section>
+    <section id="panel-library" class="panel">
+      <p class="hint">原始文件保存在 assets/ 目录；检索知识片段可追溯到对应笔记与原文件。</p>
+      <div class="row library-tabs">
+        <button type="button" class="lib-tab active" data-lib="assets">原始文件</button>
+        <button type="button" class="lib-tab" data-lib="rag">检索知识</button>
+        <button type="button" class="lib-tab" data-lib="external">外联来源</button>
+        <input id="library-search" placeholder="筛选名称、标签或内容…" />
+        <button id="btn-library-upload" type="button" class="primary">上传</button>
+        <input type="file" id="library-upload-input" multiple class="hidden" />
+        <button id="btn-library-refresh" type="button">刷新</button>
+      </div>
+      <div id="library-assets-view" class="library-body">
+        <div class="library-table-wrap">
+          <table class="library-table" id="library-asset-table">
+            <thead>
+              <tr>
+                <th class="col-no">序号</th>
+                <th class="col-title">标题</th>
+                <th class="col-type">文档类型</th>
+                <th class="col-ops">操作</th>
+              </tr>
+            </thead>
+            <tbody id="library-asset-tbody"></tbody>
+          </table>
+        </div>
+        <div id="library-asset-pager" class="pager"></div>
+      </div>
+      <div id="library-rag-view" class="library-body hidden">
+        <div id="library-rag-list" class="results"></div>
+        <div id="library-rag-pager" class="pager"></div>
+      </div>
+      <div id="library-external-view" class="library-body hidden">
+        <div id="library-external-list" class="results"></div>
+        <div id="library-external-pager" class="pager"></div>
+      </div>
+    </section>
+    <section id="panel-history" class="panel">
+      <p class="hint">查看以前的问答；选中后可回到「提问」继续聊。</p>
+      <div class="row">
+        <button id="btn-history-refresh" type="button">刷新</button>
+        <select id="history-session-filter">
+          <option value="">全部会话</option>
+        </select>
+        <button id="btn-history-continue" class="primary" type="button">继续此会话</button>
+      </div>
+      <div class="split history-split">
+        <aside class="split-sidebar">
+          <ul id="history-list" class="page-list"></ul>
+          <div id="history-list-pager" class="pager"></div>
+        </aside>
+        <div id="history-detail" class="split-main history-detail output"></div>
+      </div>
+    </section>
+    <section id="panel-memory" class="panel">
+      <p id="memory-evolution-banner" class="evolution-banner hint">易知会随你的规则、问答与归档一起变厚。</p>
+      <div class="memory-tabs row">
+        <button type="button" class="memory-tab active" data-memory-tab="rules">规则</button>
+        <button type="button" class="memory-tab" data-memory-tab="sessions">会话</button>
+        <button type="button" class="memory-tab" data-memory-tab="audit">审计</button>
+        <button type="button" class="memory-tab" data-memory-tab="contrarian">矛盾检测</button>
+        <button type="button" class="memory-tab" data-memory-tab="fortune">知签</button>
+        <button type="button" id="btn-memory-refresh">刷新</button>
+      </div>
+      <div id="memory-pane-rules" class="memory-pane">
+        <ul id="memory-rules-list" class="page-list"></ul>
+      </div>
+      <div id="memory-pane-sessions" class="memory-pane hidden">
+        <ul id="memory-sessions-list" class="page-list"></ul>
+      </div>
+      <div id="memory-pane-audit" class="memory-pane hidden">
+        <ul id="memory-audit-list" class="page-list"></ul>
+      </div>
+      <div id="memory-pane-contrarian" class="memory-pane hidden">
+        <p class="hint">对照知识库中的「核心假设」，找出互相矛盾的表述并生成对照稿；<strong>不会自动合并</strong>笔记。入库分析开启时会写入假设；也可在笔记 frontmatter 手动写 <code>assumptions</code>。</p>
+        <div class="row" style="margin-bottom:0.75rem;gap:0.5rem;flex-wrap:wrap;">
+          <button type="button" id="btn-contrarian-scan" class="primary">扫描矛盾</button>
+          <button type="button" id="btn-contrarian-refresh">刷新假设列表</button>
+        </div>
+        <p id="contrarian-status" class="hint" aria-live="polite"></p>
+        <ul id="memory-contrarian-list" class="page-list"></ul>
+      </div>
+      <div id="memory-pane-fortune" class="memory-pane hidden">
+        <p class="hint">趣味知签与库活动解读；不是操作规范。可在「设置 → 对话与记忆」关闭。</p>
+        <div id="memory-fortune-body" class="fortune-panel"></div>
+        <div class="row" style="margin:0.75rem 0;gap:0.5rem;flex-wrap:wrap;">
+          <button type="button" id="btn-fortune-checkin" class="primary">记入今日签册</button>
+          <button type="button" id="btn-fortune-refresh">刷新</button>
+        </div>
+        <h3 class="fortune-slips-heading">八日签册</h3>
+        <ul id="memory-fortune-slips" class="page-list"></ul>
+      </div>
+    </section>
+  </main>
+  <div id="text-import-modal" class="modal hidden" role="dialog" aria-labelledby="text-import-heading" aria-modal="true">
+    <div class="modal-backdrop" data-close-text-import></div>
+    <div class="modal-card modal-card-form">
+      <h2 id="text-import-heading">粘贴文本</h2>
+      <p class="hint">直接粘贴文章、笔记或转录稿，保存后自动加入问答检索。</p>
+      <input type="text" id="text-import-title" placeholder="标题（可选，留空则取首行）" />
+      <textarea id="text-import-body" rows="12" placeholder="在此粘贴纯文本内容…"></textarea>
+      <div id="text-import-busy" class="import-busy hidden" aria-live="polite">
+        <span class="import-spinner" aria-hidden="true"></span>
+        <p id="text-import-busy-text" class="import-busy-text">正在保存文本…</p>
+        <div class="import-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+          <span class="import-progress-fill"></span>
+        </div>
+      </div>
+      <p id="text-import-feedback" class="import-feedback hidden" aria-live="polite"></p>
+      <div class="modal-actions row">
+        <button id="btn-text-import-cancel" type="button">取消</button>
+        <button id="btn-text-import" class="primary" type="button">保存并加入检索</button>
+      </div>
+    </div>
+  </div>
+  <div id="persona-modal" class="modal hidden" role="dialog" aria-labelledby="persona-title" aria-modal="true">
+    <div class="modal-backdrop" data-close-persona></div>
+    <div class="modal-card modal-card-form persona-modal-card">
+      <h2 id="persona-title">自定义人设</h2>
+      <p class="hint">填写<strong>基本信息</strong>后，提问/查询/推演中的「我」会关联到你本人；角色设定控制 AI 语气（仍须基于知识库事实）。</p>
+      <label class="persona-toggle">
+        <input type="checkbox" id="persona-enabled" />
+        启用自定义人设（关闭则使用系统默认 <code>prompts/persona.md</code>）
+      </label>
+      <nav class="modal-tabs persona-tabs" id="persona-tabs" role="tablist" aria-label="人设分类">
+        <button type="button" class="modal-tab is-active" data-persona-tab="profile" role="tab" aria-selected="true">基本信息</button>
+        <button type="button" class="modal-tab" data-persona-tab="role" role="tab" aria-selected="false">角色设定</button>
+        <button type="button" class="modal-tab" data-persona-tab="style" role="tab" aria-selected="false">语气偏好</button>
+        <button type="button" class="modal-tab" data-persona-tab="preview" role="tab" aria-selected="false">预览</button>
+      </nav>
+      <div id="persona-form-fields">
+        <div class="persona-panel is-active" data-persona-tab="profile" role="tabpanel">
+          <div class="form-table-wrap">
+            <table class="form-table persona-table">
+              <tbody>
+                <tr>
+                  <td class="form-table-label">头像</td>
+                  <td class="form-table-control">
+                    <div class="persona-avatar-row">
+                      <img id="persona-avatar-preview" class="persona-avatar-preview hidden" alt="" />
+                      <div class="persona-avatar-actions">
+                        <input type="file" id="persona-avatar-file" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden" />
+                        <button type="button" id="btn-persona-avatar-pick" class="secondary">选择图片</button>
+                        <span class="hint">jpg/png，≤2MB</span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="form-table-label">姓名</td>
+                  <td class="form-table-control"><input type="text" id="persona-owner-name" placeholder="真实姓名" /></td>
+                </tr>
+                <tr>
+                  <td class="form-table-label">昵称</td>
+                  <td class="form-table-control"><input type="text" id="persona-owner-nickname" placeholder="常用称呼" /></td>
+                </tr>
+                <tr>
+                  <td class="form-table-label">性别</td>
+                  <td class="form-table-control"><select id="persona-owner-gender"></select></td>
+                </tr>
+                <tr>
+                  <td class="form-table-label">单位/组织</td>
+                  <td class="form-table-control"><input type="text" id="persona-owner-org" placeholder="可选" /></td>
+                </tr>
+                <tr>
+                  <td class="form-table-label">职务</td>
+                  <td class="form-table-control"><input type="text" id="persona-owner-title" placeholder="可选" /></td>
+                </tr>
+                <tr>
+                  <td class="form-table-label">联系电话</td>
+                  <td class="form-table-control"><input type="text" id="persona-owner-phone" placeholder="可选" /></td>
+                </tr>
+                <tr>
+                  <td class="form-table-label">邮箱</td>
+                  <td class="form-table-control"><input type="email" id="persona-owner-email" placeholder="可选" /></td>
+                </tr>
+                <tr>
+                  <td class="form-table-label">微信</td>
+                  <td class="form-table-control"><input type="text" id="persona-owner-wechat" placeholder="可选" /></td>
+                </tr>
+                <tr>
+                  <td class="form-table-label">别名</td>
+                  <td class="form-table-control"><input type="text" id="persona-owner-aliases" placeholder="多个用逗号分隔，如：易老师,文胜" /></td>
+                </tr>
+                <tr>
+                  <td class="form-table-label">简介</td>
+                  <td class="form-table-control"><textarea id="persona-owner-bio" rows="2" placeholder="一句话自我介绍（可选）"></textarea></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="persona-panel hidden" data-persona-tab="role" role="tabpanel">
+          <div class="form-table-wrap">
+            <table class="form-table persona-table">
+              <tbody>
+                <tr>
+                  <td class="form-table-label">预设模板</td>
+                  <td class="form-table-control"><select id="persona-preset"></select></td>
+                </tr>
+                <tr>
+                  <td class="form-table-label">角色名称</td>
+                  <td class="form-table-control"><input type="text" id="persona-role-name" placeholder="如：易知 竞赛教练" /></td>
+                </tr>
+                <tr>
+                  <td class="form-table-label">角色定位</td>
+                  <td class="form-table-control"><textarea id="persona-role-intro" rows="2" placeholder="一句话说明这个助手是做什么的"></textarea></td>
+                </tr>
+                <tr>
+                  <td class="form-table-label">主要读者</td>
+                  <td class="form-table-control"><input type="text" id="persona-audience" placeholder="如：参赛学生、教研组同事" /></td>
+                </tr>
+                <tr>
+                  <td class="form-table-label">擅长领域</td>
+                  <td class="form-table-control"><input type="text" id="persona-domain" placeholder="如：信息学竞赛、招生政策（可选）" /></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="persona-panel hidden" data-persona-tab="style" role="tabpanel">
+          <div class="form-table-wrap">
+            <table class="form-table persona-table">
+              <tbody>
+                <tr>
+                  <td class="form-table-label">语气风格</td>
+                  <td class="form-table-control"><div class="persona-checks persona-checks-col" id="persona-tones"></div></td>
+                </tr>
+                <tr>
+                  <td class="form-table-label">表达偏好</td>
+                  <td class="form-table-control"><div class="persona-checks persona-checks-col" id="persona-preferences"></div></td>
+                </tr>
+                <tr>
+                  <td class="form-table-label">补充说明</td>
+                  <td class="form-table-control"><textarea id="persona-custom-notes" rows="3" placeholder="其它你希望 AI 遵守的风格或禁忌"></textarea></td>
+                </tr>
+                <tr>
+                  <td class="form-table-label">硬性约束</td>
+                  <td class="form-table-control">
+                    <label class="persona-inline-check">
+                      <input type="checkbox" id="persona-grounded" checked />
+                      保留「只许用库内事实、禁止编造」等硬性约束
+                    </label>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="persona-panel hidden" data-persona-tab="preview" role="tabpanel">
+          <div class="form-table-wrap">
+            <table class="form-table persona-table">
+              <tbody>
+                <tr>
+                  <td class="form-table-label">人设预览</td>
+                  <td class="form-table-control">
+                    <textarea id="persona-preview" class="persona-preview" rows="12" readonly placeholder="填写后点击「预览」查看生成的人设提示词"></textarea>
+                    <p class="form-table-hint">保存后生效；可先点下方「预览」刷新内容。</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <p id="persona-feedback" class="import-feedback hidden" aria-live="polite"></p>
+      <div class="modal-actions row persona-actions">
+        <button id="btn-persona-reset" type="button">恢复默认</button>
+        <button id="btn-persona-preview" type="button">预览</button>
+        <button id="btn-persona-cancel" type="button">取消</button>
+        <button id="btn-persona-save" class="primary" type="button">保存</button>
+      </div>
+    </div>
+  </div>
+  <div id="settings-modal" class="modal hidden" role="dialog" aria-labelledby="settings-title" aria-modal="true">
+    <div class="modal-backdrop" data-close-settings></div>
+    <div class="modal-card modal-card-form settings-modal-card">
+      <h2 id="settings-title">设置</h2>
+      <p id="settings-note" class="hint"></p>
+      <div id="settings-form" class="settings-form"></div>
+      <p id="settings-feedback" class="import-feedback hidden" aria-live="polite"></p>
+      <div class="modal-actions row settings-actions">
+        <button id="btn-settings-cancel" type="button">取消</button>
+        <button id="btn-settings-save" class="primary" type="button">保存</button>
+      </div>
+    </div>
+  </div>
+  <div id="about-modal" class="modal hidden" role="dialog" aria-labelledby="about-title" aria-modal="true">
+    <div class="modal-backdrop" data-close-about></div>
+    <div class="modal-card">
+      <img class="about-icon" src="../assets/icon-256.png" width="72" height="72" alt="易知" />
+      <h2 id="about-title">易知</h2>
+      <p class="about-copy">易文胜开发 2026</p>
+      <p class="about-desc">个人知识库 · 导入文档 · 智能问答 · 本地大模型</p>
+      <p id="about-version" class="about-version hint"></p>
+      <p id="about-license" class="about-license hint"></p>
+      <div id="about-license-actions" class="about-license-actions hidden">
+        <button id="btn-about-renew" type="button">续费 / 激活</button>
+        <button id="btn-about-self-unbind" type="button" class="danger">自助换机（每年 1 次）</button>
+      </div>
+      <div class="about-actions">
+        <button id="btn-about-check-update" type="button">检查更新</button>
+        <button id="btn-about-download" type="button" class="hidden">前往下载</button>
+        <button id="btn-about-purchase" type="button">购买说明</button>
+        <button id="btn-about-faq" type="button">常见问题</button>
+        <button id="btn-about-changelog" type="button">更新记录</button>
+        <button id="btn-about-tour" type="button">新手指引</button>
+        <button id="btn-about-promo-audio" type="button" title="播放预置自我介绍口播">自我介绍</button>
+      </div>
+      <audio id="about-self-intro-audio" preload="metadata" src="../assets/audio/yizhi-self-intro.mp3?v=3"></audio>
+      <p id="about-promo-audio-status" class="about-update-status hint" aria-live="polite"></p>
+      <p id="about-update-status" class="about-update-status hint" aria-live="polite"></p>
+      <button id="about-close" class="primary" type="button">确定</button>
+    </div>
+  </div>
+  <div id="feedback-modal" class="modal hidden" role="dialog" aria-labelledby="feedback-title" aria-modal="true">
+    <div class="modal-backdrop" data-close-feedback></div>
+    <div class="modal-card feedback-modal-card">
+      <h2 id="feedback-title">意见反馈</h2>
+      <p class="hint feedback-lead">描述使用中的问题或建议，您的反馈将帮助易知持续改进。</p>
+      <div class="feedback-meta-row">
+        <label class="feedback-field">
+          <span>标题（可选）</span>
+          <input id="feedback-subject" type="text" placeholder="例如：保存笔记无反应" maxlength="120" />
+        </label>
+        <label class="feedback-field">
+          <span>联系方式（可选）</span>
+          <input id="feedback-contact" type="text" placeholder="邮箱 / 微信 / 手机" maxlength="120" />
+        </label>
+      </div>
+      <div id="feedback-editor-host" class="feedback-editor-host" aria-label="反馈正文"></div>
+      <p id="feedback-status" class="hint feedback-status" aria-live="polite"></p>
+      <div class="row feedback-actions">
+        <button id="feedback-cancel" type="button">取消</button>
+        <button id="feedback-submit" class="primary" type="button">提交反馈</button>
+      </div>
+    </div>
+  </div>
+  <div id="license-overlay" class="license-overlay hidden" role="dialog" aria-labelledby="license-title" aria-modal="true">
+    <div class="license-card">
+      <div class="license-card-glow" aria-hidden="true"></div>
+      <div class="license-card-inner">
+        <button type="button" id="btn-license-close" class="license-close" aria-label="关闭">×</button>
+        <div class="license-header">
+          <div class="license-icon-wrap">
+            <img class="license-icon" src="../assets/icon-256.png" width="56" height="56" alt="" />
+          </div>
+          <div class="license-header-text">
+            <h2 id="license-title">激活易知</h2>
+            <p id="license-reason" class="license-reason"></p>
+          </div>
+        </div>
+        <p id="license-device-hint" class="license-device-hint"></p>
+        <div id="license-assets" class="license-assets-host hidden"></div>
+        <div id="license-plans" class="license-plans"></div>
+        <div id="license-qr-wrap" class="license-qr-wrap hidden">
+          <p class="hint">请使用微信或支付宝扫码支付</p>
+          <div id="license-qr" class="license-qr"></div>
+          <p id="license-order-meta" class="hint"></p>
+          <button id="btn-license-mock-pay" type="button" class="hidden">模拟支付（开发）</button>
+        </div>
+        <div class="license-code-row">
+          <input id="license-code-input" placeholder="已有激活码？在此输入" />
+          <button id="btn-license-code" type="button">激活</button>
+        </div>
+        <p id="license-log" class="license-log"></p>
+      </div>
+    </div>
+  </div>
+  <div id="scope-modal" class="modal hidden" role="dialog" aria-labelledby="scope-title" aria-modal="true">
+    <div class="modal-backdrop" data-close-scope></div>
+    <div class="modal-card modal-card-form scope-modal-card">
+      <h2 id="scope-title">选择限定资料</h2>
+      <p class="hint">勾选后，提问与写文章仅检索这些文件/笔记（可多选）。</p>
+      <input id="scope-search" type="search" placeholder="筛选名称…" />
+      <div class="scope-columns">
+        <div class="scope-col">
+          <h3>原始文件</h3>
+          <ul id="scope-assets-list" class="scope-list"></ul>
+        </div>
+        <div class="scope-col">
+          <h3>知识笔记</h3>
+          <ul id="scope-pages-list" class="scope-list"></ul>
+        </div>
+      </div>
+      <div class="modal-actions row">
+        <button id="btn-scope-clear" type="button">清空</button>
+        <button id="btn-scope-cancel" type="button">取消</button>
+        <button id="btn-scope-apply" class="primary" type="button">确定</button>
+      </div>
+    </div>
+  </div>
+  <div id="output-rules-modal" class="modal hidden" role="dialog" aria-labelledby="output-rules-title" aria-modal="true">
+    <div class="modal-backdrop" data-close-output-rules></div>
+    <div class="modal-card modal-card-form">
+      <h2 id="output-rules-title">写入输出规则</h2>
+      <p class="hint">追加到 <code>prompts/output-rules.md</code>，下次提问与写文章时会注入（仍须基于检索片段，不得编造事实）。</p>
+      <label class="persona-field">
+        <span>触发问题（可选）</span>
+        <input type="text" id="output-rules-question" readonly />
+      </label>
+      <label class="persona-field">
+        <span>纠错 / 偏好规则</span>
+        <textarea id="output-rules-body" rows="6" placeholder="例如：对外答复不要承诺具体到账时间；不要使用「一般来说」开头…"></textarea>
+      </label>
+      <div class="modal-actions row">
+        <button id="btn-output-rules-cancel" type="button">取消</button>
+        <button id="btn-output-rules-save" class="primary" type="button">保存</button>
+      </div>
+    </div>
+  </div>
+  <div id="continuity-modal" class="modal hidden" role="dialog" aria-labelledby="continuity-title" aria-modal="true">
+    <div class="modal-backdrop" data-close-continuity></div>
+    <div class="modal-card modal-card-form">
+      <h2 id="continuity-title">欢迎回来</h2>
+      <p id="continuity-modal-body" class="hint">正在读取上次进度…</p>
+      <div class="modal-actions row">
+        <button type="button" id="btn-continuity-dismiss-today">今日不再显示</button>
+        <button type="button" id="btn-continuity-modal-new">新开对话</button>
+        <button type="button" id="btn-continuity-modal-continue" class="primary">继续上次</button>
+      </div>
+    </div>
+  </div>
+  <div id="fortune-modal" class="modal hidden" role="dialog" aria-labelledby="fortune-title" aria-modal="true">
+    <div class="modal-backdrop" data-close-fortune></div>
+    <div class="modal-card modal-card-form">
+      <h2 id="fortune-title">今日知签</h2>
+      <div id="fortune-modal-body" class="fortune-panel hint"></div>
+      <div class="modal-actions row">
+        <button type="button" id="btn-fortune-modal-memory">记忆里看签册</button>
+        <button type="button" id="btn-fortune-modal-close" class="primary">知道了</button>
+      </div>
+    </div>
+  </div>
+  <div id="confirm-modal" class="modal hidden" role="alertdialog" aria-labelledby="confirm-modal-title" aria-modal="true">
+    <div class="modal-backdrop" data-close-confirm></div>
+    <div class="modal-card modal-card-form confirm-modal-card">
+      <h2 id="confirm-modal-title">请确认</h2>
+      <p id="confirm-modal-message" class="confirm-modal-message"></p>
+      <div class="modal-actions row">
+        <button id="confirm-modal-cancel" type="button">取消</button>
+        <button id="confirm-modal-ok" class="primary danger" type="button">确定</button>
+      </div>
+    </div>
+  </div>
+  <script src="vendor/d3/d3.min.js"></script>
+  <script src="deduce-graph.js"></script>
+  <script src="vendor/toastui-editor/marked.umd.js"></script>
+  <script src="vendor/toastui-editor/toastui-editor-all.min.js"></script>
+  <!-- i18n 必须在 Editor 主脚本之后，否则 zh-CN 注册失败，闪念编辑器可能起不来 -->
+  <script src="vendor/toastui-editor/i18n-zh-cn.js"></script>
+  <script src="rich-editor.js"></script>
+  <script src="toast.js"></script>
+  <script src="confirm.js"></script>
+  <script src="jobs-ui.js"></script>
+  <script src="onboarding.js"></script>
+  <script src="app.js"></script>
+  <script src="service-loop.js"></script>
+</body>
+</html>

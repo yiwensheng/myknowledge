@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>易知 · 常见问题</title>
+  <style>
+    body { font-family: "Segoe UI", "PingFang SC", sans-serif; max-width: 720px; margin: 0 auto; padding: 24px 20px 48px; line-height: 1.7; color: #1a1a1a; background: #f8fafc; }
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.1rem; margin-top: 1.5em; }
+    .q { font-weight: 600; margin-top: 1em; }
+    a { color: #2563eb; }
+  </style>
+</head>
+<body>
+  <h1>易知 · 常见问题</h1>
+  <p><a href="purchase.html">← 购买与订阅</a> · <a href="changelog.html">更新记录</a></p>
+
+  <h2>安装</h2>
+  <p class="q">支持哪些系统？</p>
+  <p>目前<strong>仅提供 Windows 64 位（x64）</strong>安装包。不支持 Windows 32 位、ARM（如部分 Surface）、macOS、Linux。请在「关于本机」确认系统类型为 64 位操作系统。</p>
+  <p class="q">提示找不到 Python？</p>
+  <p>请使用官方安装包（内置运行环境），勿直接运行源码。</p>
+  <p class="q">下载后无法运行 / SmartScreen 拦截？</p>
+  <p>请确认下载的是官网 <code>.zip</code> 内的 <code>Yizhi-Setup-x.y.z.exe</code>（先解压再安装）。若 Windows 提示「已保护你的电脑」，点「更多信息 → 仍要运行」。仍失败时：关闭杀软实时扫描后重试；或以管理员身份运行安装程序；检查磁盘空间是否充足（建议剩余 ≥ 2GB）。</p>
+  <p class="q">安装后打不开 / 闪退？</p>
+  <p>安装包会引导安装 VC++ 运行库；若跳过可能导致无法启动。请重新运行安装程序并完成 VC 红配。仍不行请把 <code>%APPDATA%\Yizhi</code> 下最近日志与设备信息发给客服。</p>
+  <p class="q">32 位或 ARM 机器能用吗？</p>
+  <p>不能。请换用 x64 Windows 电脑，或使用远程桌面连到 64 位环境。</p>
+
+  <h2>大模型</h2>
+  <p class="q">订阅包含 API 费用吗？</p>
+  <p>不包含。请在「设置 → 大模型」填写您自己的 API Key。</p>
+  <p class="q">能力检测有红项？</p>
+  <p>设置 → 能力检测 → 一键修复可选工具。</p>
+
+  <h2>订阅</h2>
+  <p class="q">有试用吗？</p>
+  <p>新用户安装后自动享有 30 天试用（按自然日计算，与是否打开软件无关）。第 31 天起需订阅月付、年付或终身版。</p>
+  <p class="q">终身版是什么？</p>
+  <p>一次性付费 199 元，永久使用易知软件更新与全部功能（不含大模型 API 费用）。</p>
+  <p class="q">支付成功未解锁？</p>
+  <p>等待 1～2 分钟或重启易知；仍不行请联系客服并提供设备 ID 与支付截图。</p>
+  <p class="q">换机？</p>
+  <p>关于 → 自助换机（每年 1 次），或联系客服。</p>
+  <p class="q">离线能用吗？</p>
+  <p>上次联网校验成功后 7 天内可离线使用。</p>
+
+  <h2>隐私</h2>
+  <p class="q">数据存在哪？</p>
+  <p>全部在本地 wiki 目录；授权服务仅接收设备 ID 与订单信息，不上传笔记内容。</p>
+</body>
+</html>

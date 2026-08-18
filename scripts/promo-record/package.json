@@ -1,0 +1,14 @@
+{
+  "name": "yizhi-promo-record",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Playwright Electron 录屏：易知功能点宣传演示",
+  "type": "commonjs",
+  "scripts": {
+    "record": "node record-demo.cjs",
+    "postinstall": "npx playwright install chromium"
+  },
+  "dependencies": {
+    "playwright": "^1.52.0"
+  }
+}

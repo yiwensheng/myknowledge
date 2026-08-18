@@ -1,0 +1,10 @@
+# 开发机默认依赖 = 运行时最小集 + 可选增强
+# 安装包构建只使用 requirements-runtime.txt
+
+-r requirements-runtime.txt
+
+# --- 以下仅开发机 / 可选能力，不打进安装包 ---
+# OCR（需本机另装 Tesseract）
+pytesseract>=0.3.10
+# 无 third_party/ffmpeg 时的兜底（安装包已内置 ffmpeg，不需要）
+imageio-ffmpeg>=0.5.0

@@ -1,0 +1,5 @@
+{
+  "latest_version": "3.0.2",
+  "download_url": "https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-3.0.2.zip",
+  "release_notes": "修复外联目录添加报错（配置改写知识库可写路径并自动迁移）；继承 3.0.1 启动自动检查更新与进度条开关修复；继承 3.0.0 服务闭环、五场景模板、到期资产与知识库初始化。"
+}

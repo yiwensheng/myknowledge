@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>易知 · 更新记录</title>
+  <style>
+    body { font-family: "Segoe UI", "PingFang SC", sans-serif; max-width: 720px; margin: 0 auto; padding: 24px 20px 48px; line-height: 1.7; color: #1a1a1a; background: #f8fafc; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.25em; }
+    .sub { color: #64748b; font-size: 0.95rem; margin-bottom: 1.5em; }
+    h2 { font-size: 1.15rem; margin-top: 2em; margin-bottom: 0.25em; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.35em; }
+    .date { color: #64748b; font-weight: normal; font-size: 0.9rem; }
+    .badge-failed { display: inline-block; margin-left: 0.5em; padding: 0.1em 0.45em; font-size: 0.75rem; font-weight: 600; color: #991b1b; background: #fee2e2; border-radius: 4px; vertical-align: middle; }
+    .dl { margin: 0.35em 0 0.75em; font-size: 0.95rem; }
+    .dl a { font-weight: 600; }
+    ul { padding-left: 1.25rem; margin: 0.5em 0 0; }
+    li { margin: 0.35em 0; }
+    a { color: #2563eb; }
+    nav { margin-bottom: 1.5em; font-size: 0.95rem; }
+    .warn { background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; padding: 0.75em 1em; border-radius: 8px; margin: 1em 0; }
+    .platform-note {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #dc2626;
+      color: #7f1d1d;
+      padding: 0.85em 1em;
+      border-radius: 8px;
+      margin: 0 0 1.5em;
+      font-size: 1.02rem;
+      line-height: 1.55;
+    }
+    .platform-note strong { color: #991b1b; }
+  </style>
+</head>
+<body>
+  <h1>易知 · 更新记录</h1>
+  <p class="sub">按版本汇总主要变化。各版本安装包可直接下载；软件内「关于 → 检查更新」可检测最新版。</p>
+  <nav>
+    <a href="purchase.html">购买与订阅</a> ·
+    <a href="faq.html">常见问题</a> ·
+    <a href="https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-3.0.2.zip">下载最新版 3.0.2</a>
+  </nav>
+
+  <p class="platform-note" role="note">
+    <strong>运行环境说明：</strong>易知目前<strong>仅支持 Windows 64 位（x64）</strong>桌面环境，不提供 macOS / Linux / 32 位 Windows 安装包。请确认本机系统为 64 位后再下载安装。安装与拦截问题见 <a href="faq.html">常见问题</a>。
+  </p>
+
+  <h2>3.0.2 <span class="date">2026-08-13</span></h2>
+  <p class="dl">下载：<a href="https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-3.0.2.zip">Yizhi-Setup-3.0.2.zip</a></p>
+  <ul>
+    <li><strong>修复外联目录</strong>：解决「导入资料 → 外联目录 → 添加目录」报 Internal Server Error。外联配置改为写入用户知识库目录（可写），并自动迁移旧安装目录下的配置。</li>
+    <li><strong>继承 3.0.1</strong>：启动自动检查更新；测试连接与进度条开关修复。</li>
+    <li><strong>继承 3.0.0</strong>：服务闭环、五场景模板、到期资产、知识库初始化。</li>
+  </ul>
+
+  <h2>3.0.1 <span class="date">2026-08-13</span></h2>
+  <p class="dl">下载：<a href="https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-3.0.1.zip">Yizhi-Setup-3.0.1.zip</a></p>
+  <ul>
+    <li><strong>自动检查更新</strong>：有网络时启动后自动检查；发现新版才弹窗提示并可前往下载；本次运行只检查一次。关于页仍可手动「检查更新」。</li>
+    <li><strong>修复</strong>：大模型「测试连接」标记进度时的请求头问题；进度条收起后顶栏可再展开「服务进度」。</li>
+    <li><strong>继承 3.0.0</strong>：服务闭环、五场景模板、到期资产、知识库初始化。</li>
+  </ul>
+
+  <h2>3.0.0 <span class="date">2026-08-13</span></h2>
+  <p class="dl">下载：<a href="https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-3.0.0.zip">Yizhi-Setup-3.0.0.zip</a></p>
+  <ul>
+    <li><strong>服务闭环（本版重点）</strong>：顶栏「本周服务进度」引导测通大模型 → 入库/笔记 → 有出处提问 → 可选蒸馏；收起后可用顶栏「服务进度」再展开。设置「大模型」支持一键测试连接。</li>
+    <li><strong>场景模板</strong>：写文章旁可开模板——教师课堂六步（备课→上课→练习→作业→检测→反馈）、考研/教研、自媒体、职场、一人公司 OPC；草案预览确认后写入笔记，不编造未提供事实。</li>
+    <li><strong>到期资产</strong>：试用将尽或续费时展示本地笔记、提问、蒸馏等资产摘要，便于理解「为何续费」。</li>
+    <li><strong>知识库初始化</strong>：设置新增「初始化」选项卡，强提醒后可清零用户资料；外联只取消登记，不删外部真实目录与文件。</li>
+    <li><strong>继承</strong>：2.5.x 自我蒸馏、PDF 分栏/整表、有据问答与本地优先等能力。</li>
+  </ul>
+
+  <h2>2.5.1 <span class="date">2026-08-10</span></h2>
+  <p class="dl">下载：<a href="https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-2.5.1.zip">Yizhi-Setup-2.5.1.zip</a></p>
+  <ul>
+    <li><strong>蒸馏体验</strong>：工作流「蒸馏本次产出」默认先预览；末行写「确认入库」后再写入。提问页展示本次引用的 Skills / Principle。</li>
+    <li><strong>解析增强</strong>：PDF 分栏阅读序；可选图表视觉图注（默认关，设 <code>MYKNOWLEDGE_PDF_CAPTION=1</code>）。继承表行安全分块与「解析质量抽检」。</li>
+    <li><strong>安装包</strong>：staging 进一步剔除 DocuBrowser 测试 PDF / 文档截图等冗余。</li>
+    <li><strong>Windows 指引</strong>：FAQ 与新手指引（v5）强化仅 Win64、SmartScreen、VC 运行库说明。</li>
+  </ul>
+
+  <h2>2.5.0 <span class="date">2026-08-09</span></h2>
+  <p class="dl">下载：<a href="https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-2.5.0.zip">Yizhi-Setup-2.5.0.zip</a></p>
+  <ul>
+    <li><strong>自我蒸馏（本版重点）</strong>：启动后在知识库自动建立 <code>distill/</code> 四层——
+      <strong>Memory</strong>（原始案例）、<strong>Skills</strong>（可复用范式）、<strong>Principle</strong>（取舍原则）、<strong>Meta</strong>（蒸馏规则）。
+      做完一件事，在「导入资料 → 工作流」运行<strong>蒸馏本次产出</strong>：把正文/摘要压成 1 条 Skill + 可选 Principle，并归档 Memory。
+      之后<strong>提问</strong>与<strong>写文章</strong>会自动检索 Skills/Principle，让 AI 按你的做事方式表达与取舍（仍只许用库内事实）。新手指引已补充说明（v4）。</li>
+    <li><strong>相对 2.4.2</strong>：2.4.2 已含 PDF 整表 Markdown 入库与扫描表 ONNX/OCR；2.5.0 在其上新增完整「自我蒸馏」闭环，不内置 Crawl4AI。</li>
+    <li><strong>继承</strong>：2.4.1 OCR 进检索、订阅角标仅付费显示，以及 2.4.0 安装启动/ffmpeg/播客等能力。</li>
+  </ul>
+
+  <h2>2.4.2 <span class="date">2026-08-07</span></h2>
+  <p class="dl">下载：<a href="https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-2.4.2.zip">Yizhi-Setup-2.4.2.zip</a></p>
+  <ul>
+    <li><strong>PDF 整表进检索</strong>：数字 PDF 用 pdfplumber 提取完整表格为 Markdown（<code>第N页-表格K</code>），避免表格被拆成碎行。可用 <code>MYKNOWLEDGE_PDF_TABLES=0</code> 关闭。</li>
+    <li><strong>扫描表增强</strong>：弱文本页可用随包 ONNX 表格检测（Microsoft TATR）+ Tesseract；无模型时自动降级为 OCR 启发式。开关 <code>MYKNOWLEDGE_PDF_LAYOUT</code>。</li>
+    <li><strong>未改</strong>：不内置 Crawl4AI；URL 抓取仍用现有 baoyu 路径（包体与换机可控）。</li>
+    <li><strong>继承 2.4.1</strong>：PDF 内嵌图/扫描页 OCR、订阅角标仅付费显示等。</li>
+  </ul>
+
+
+  <h2>2.4.1 <span class="date">2026-08-05</span></h2>
+  <p class="dl">下载：<a href="https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-2.4.1.zip">Yizhi-Setup-2.4.1.zip</a></p>
+  <ul>
+    <li><strong>PDF 图片识别进检索</strong>：导入 PDF 时识别内嵌大图与扫描页文字（Tesseract + PyMuPDF），写入提取文本并进入 RAG；可用 <code>MYKNOWLEDGE_PDF_OCR=0</code> 关闭。需本机安装 Tesseract（建议含 <code>chi_sim</code>）。已入库旧 PDF 请重新导入以补全。</li>
+    <li><strong>订阅角标</strong>：左上角仅付费订阅显示方案与有效期；试用期间不再显示剩余天数。</li>
+    <li><strong>继承 2.4.0</strong>：安装启动修复、内置 ffmpeg、播客完整合成、写文章流式布局、新手指引 v3、反馈弹窗加大等。</li>
+  </ul>
+
+  <h2>2.4.0 <span class="date">2026-08-04</span></h2>
+  <p class="dl">下载：<a href="https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-2.4.0.exe">Yizhi-Setup-2.4.0.exe</a></p>
+  <ul>
+    <li><strong>安装启动修复</strong>：修复安装版引擎因 DocuBrowser 旁路误启动而超时失败的问题；请使用本页最新 Setup。</li>
+    <li><strong>内置 ffmpeg</strong>：安装包携带完整 <code>ffmpeg</code>（含 DLL），播客完整音频合并与音视频处理开箱可用。</li>
+    <li><strong>播客完整合成</strong>：对话脚本全文按主持人/嘉宾分段 TTS 并合并成完整文件；修复台词含「脚注」等词时音频被截断约 1 分钟的问题；合成后可在写文章页直接播放与下载。</li>
+    <li><strong>写文章布局</strong>：整页一条滚动条；草稿编辑器随正文流式增高，避免叠字或挤掉上方控件。</li>
+    <li><strong>新手指引 v3</strong>：对齐 2.4 能力（导入含 B 站字幕/外联 → 提问与续航知签 → 推演 → 写文章与播客 → 记忆与进化/矛盾检测 → 反馈等）；升级用户会再引导一次，亦可在「关于」重播。</li>
+    <li><strong>意见反馈</strong>：顶栏反馈入口支持富文本；修复弹窗过窄、正文编辑区几乎看不见的问题（加大弹窗与编辑区高度）。</li>
+    <li><strong>订阅状态展示</strong>：左上角仅在已付费订阅时显示方案与有效期；试用期间不再显示「试用剩余 N 天」。</li>
+    <li><strong>记忆与进化</strong>：续航条与「记忆与进化」面板跟踪规则、会话、审计；优质问答可归档，库随使用变厚。</li>
+    <li><strong>矛盾检测</strong>：对照核心假设扫描互相矛盾的表述并生成对照稿（不自动合并笔记）。</li>
+    <li><strong>检索增强</strong>：父-子分块、冲突提示；可选 HyDE；提问更贴原文、多源冲突更清晰。</li>
+    <li><strong>今日知签 / 库运势</strong>：趣味宜忌与基于近 7 日真实统计的库况解读；八日签册；写文章可选「今日可归档」清单（默认关）。</li>
+    <li><strong>目标任务书（leader）</strong>：工作流一键生成可执行任务书；内置去 AI 味写作约束（可关）。</li>
+    <li><strong>系统要求</strong>：仅支持 <strong>64 位</strong> Windows 10（1809+）/ Windows 11；不支持 32 位系统。</li>
+    <li><strong>安装与体积</strong>：安装版优先仅用冻结后端、精简 Electron 依赖；启动闪屏分阶段提示并汇总失败日志。</li>
+  </ul>
+
+  <h2>2.3.0 <span class="date">2026-07-18</span></h2>
+  <p class="dl">下载：<a href="https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-2.3.0.zip">Yizhi-Setup-2.3.0.zip</a></p>
+  <ul>
+    <li><strong>写文章 · 改稿闭环</strong>：生成后进入可编辑草稿，可直接改正文，也可填写改稿要求让 AI 修改（可选重新检索知识库）；满意后点「确认定稿」才写入知识库，并可继续修改后覆盖同一页。</li>
+    <li><strong>B 站字幕入库</strong>：「保存网页」支持 bilibili.com / b23.tv；仅提取字幕入库并进入检索。无可用字幕时明确提示。安装包内置 yt-dlp。</li>
+    <li><strong>安装版稳定性</strong>：修复默认工作流缺失、资料库「浏览」预览失败、笔记保存无反应等问题（安装根目录解析）。</li>
+  </ul>
+
+  <h2>2.2.0 <span class="date">2026-07-15</span></h2>
+  <p class="dl">下载：<a href="https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-2.2.0.exe">Yizhi-Setup-2.2.0.exe</a></p>
+  <ul>
+    <li><strong>资料夹</strong>：默认「工作 / 学习 / 生活 / 阅读 / 归档」，可在设置中增删改；笔记、闪念、上传文件与外联目录可多选归属；提问与写文章可按资料夹限定范围。</li>
+    <li><strong>后端二进制化</strong>：安装包内优先使用 <code>runtime\yizhi-backend.exe</code>（PyInstaller），减少源码目录暴露；启动仍兼容内置 Python 回退。</li>
+    <li><strong>静默启动</strong>：桌面/开始菜单快捷方式经 VBS 启动，避免控制台黑窗。</li>
+    <li><strong>闪念</strong>：修复安装版时间线保存误报「请输入内容」；富文本读取更稳健。</li>
+    <li><strong>默认工作流</strong>：安装包保留 <code>skills/</code>，工作流卡片可正常显示。</li>
+    <li><strong>播客</strong>：对话语气更亲切自然，过渡更顺畅。</li>
+    <li><strong>设置</strong>：资料夹管理改为独立选项卡，界面更紧凑。</li>
+  </ul>
+
+  <h2>2.1.2 <span class="date">2026-07-14</span></h2>
+  <p class="dl">下载：<a href="https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-2.1.2.exe">Yizhi-Setup-2.1.2.exe</a></p>
+  <ul>
+    <li><strong>正式替代 2.1.1</strong>：请勿再安装或分发 2.1.1；已安装者请用本版 Setup 覆盖升级。</li>
+    <li><strong>安装与启动</strong>：安装结束自检认可搬迁 Python；桌面快捷方式改为可靠启动；保留 Electron 必需的 <code>default_app.asar</code>；ffmpeg 随包带齐 DLL。</li>
+    <li><strong>笔记</strong>：修复闪念保存无反应、编辑器左侧选中正文不显示等问题。</li>
+    <li><strong>播客</strong>：修复完整音频合并因内置 ffmpeg 缺 DLL 而失败。</li>
+  </ul>
+
+  <h2>2.1.1 <span class="date">2026-07-14</span> <span class="badge-failed">失败版本 · 已撤回</span></h2>
+  <p class="warn"><strong>请勿安装本版本。</strong>2.1.1 为失败产品，存在启动失败、编辑器异常、ffmpeg 残缺等问题。请改用 <a href="https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-2.4.0.exe"><strong>2.4.0</strong></a>（或至少 2.1.2 / 2.2.0 / 2.3.0）。</p>
+  <ul>
+    <li>原计划：可搬迁内置 Python、依赖精简等（相关修复已并入 2.1.2）。</li>
+  </ul>
+
+  <h2>2.1.0 <span class="date">2026-07-13</span></h2>
+  <p class="dl">下载：<a href="https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-2.1.0.exe">Yizhi-Setup-2.1.0.exe</a></p>
+  <ul>
+    <li><strong>推演</strong>：输入自然语言问题，基于本地知识库检索生成关系图与推演报告，可保存为笔记或导出 Word。</li>
+    <li><strong>人设 · 基本信息</strong>：可填写姓名、昵称、单位等；提问与推演时「我」会关联您的资料与闪念。</li>
+    <li><strong>导入资料</strong>：工作流运行时有「工作中…」状态提示；上传完成后检索库在后台更新，进度提示更准确。</li>
+    <li><strong>闪念</strong>：时间线默认折叠为两行，长内容可点「更多」展开。</li>
+    <li><strong>新手指引</strong>：优化首次使用路线；富文本插入图片/链接弹层显示完整。</li>
+    <li><strong>安装与启动</strong>：安装程序版本信息完善；桌面快捷方式启动更可靠；覆盖安装时可自动关闭旧进程。</li>
+    <li><strong>体验优化</strong>：订阅/试用状态顶部提示；播客与导出文件写入用户目录；笔记删除后列表即时刷新；待整理可一键打开编辑。</li>
+  </ul>
+
+  <h2>2.0.1 <span class="date">2026-07-13</span></h2>
+  <p class="dl">下载：<a href="https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-2.0.1.exe">Yizhi-Setup-2.0.1.exe</a></p>
+  <ul>
+    <li>修复安装包覆盖安装时因进程占用导致失败的问题。</li>
+    <li>安装进度页布局与文案显示优化。</li>
+    <li>静默启动与启动动画（Splash），不再弹出命令行窗口。</li>
+    <li>用户配置与数据目录统一至 <code>%LOCALAPPDATA%\Yizhi</code>。</li>
+  </ul>
+
+  <h2>2.0.0 <span class="date">2026-07-12</span></h2>
+  <p class="dl">下载：<a href="https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-2.0.0.exe">Yizhi-Setup-2.0.0.exe</a></p>
+  <ul>
+    <li>首个公开发布安装版：本地知识库、文档导入、智能问答、订阅与激活。</li>
+    <li>支持 30 天试用，月付/年付/终身版订阅；在线购买与扫码支付。</li>
+    <li>软件内「关于 → 检查更新」对接官方更新源。</li>
+  </ul>
+</body>
+</html>

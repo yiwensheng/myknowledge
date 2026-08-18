@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>授权运营台 · 易知 / 周易</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #fff;
+      --text: #1a1d21;
+      --muted: #667085;
+      --line: #e4e7ec;
+      --accent: #0f6e56;
+      --accent2: #175cd3;
+      --danger: #b42318;
+      --yizhi: #175cd3;
+      --zhouyi: #b54708;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; }
+    h1 { font-size: 1.35rem; margin: 0 0 4px; }
+    .sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .grow { flex: 1; }
+    label { font-size: 0.85rem; color: var(--muted); display: block; margin-bottom: 4px; }
+    input, select, button, textarea {
+      font: inherit;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    button {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      cursor: pointer;
+    }
+    button.secondary { background: #fff; color: var(--text); }
+    button.danger { background: var(--danger); border-color: var(--danger); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .tabs button {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+    .tabs button.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .pill {
+      display: inline-flex;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: #eef2f6;
+    }
+    .pill.yizhi { background: #eff8ff; color: var(--yizhi); }
+    .pill.zhouyi { background: #fffaeb; color: var(--zhouyi); }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+    }
+    .stat {
+      background: #f9fafb;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .stat .v { font-size: 1.25rem; font-weight: 650; }
+    .stat .k { font-size: 0.8rem; color: var(--muted); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; }
+    .err { color: var(--danger); margin-top: 8px; }
+    .ok { color: var(--accent); margin-top: 8px; }
+    .hidden { display: none !important; }
+    .field { min-width: 140px; }
+    button.btn-sm { padding: 4px 8px; font-size: 0.8rem; }
+    button.btn-free { background: #6941c6; border-color: #6941c6; }
+    td.actions { white-space: nowrap; }
+    td.actions button { margin-right: 4px; margin-bottom: 2px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>授权运营台</h1>
+    <p class="sub">易知 / 周易共用 · <code id="baseHint"></code></p>
+
+    <div id="loginCard" class="card">
+      <label for="adminKey">LICENSE_ADMIN_KEY</label>
+      <div class="row">
+        <input id="adminKey" class="grow" type="password" placeholder="管理密钥" autocomplete="off" />
+        <button id="btnLogin" type="button">进入</button>
+      </div>
+      <p id="loginErr" class="err hidden"></p>
+    </div>
+
+    <div id="app" class="hidden">
+      <div class="card row">
+        <div>
+          <label>产品范围</label>
+          <select id="productFilter">
+            <option value="">全部（合计）</option>
+            <option value="yizhi">仅易知</option>
+            <option value="zhouyi">仅周易卦象</option>
+          </select>
+        </div>
+        <div class="grow"></div>
+        <button type="button" class="secondary" id="btnRefresh">刷新</button>
+        <button type="button" class="secondary" id="btnLogout">退出</button>
+      </div>
+
+      <div class="tabs">
+        <button type="button" data-tab="overview" class="active">总览</button>
+        <button type="button" data-tab="orders">订单</button>
+        <button type="button" data-tab="channels">渠道对账</button>
+        <button type="button" data-tab="ops">运维</button>
+        <button type="button" data-tab="feedback">反馈</button>
+      </div>
+
+      <section id="tab-overview" class="card">
+        <div class="stats" id="overviewStats"></div>
+        <h3 style="margin:16px 0 8px;font-size:1rem">分产品营收（已付）</h3>
+        <div id="byProduct"></div>
+        <h3 style="margin:16px 0 8px;font-size:1rem">分套餐</h3>
+        <div id="byPlan"></div>
+      </section>
+
+      <section id="tab-orders" class="card hidden">
+        <div class="row" style="margin-bottom:12px">
+          <div class="field">
+            <label>状态</label>
+            <select id="orderStatus">
+              <option value="">全部</option>
+              <option value="paid">已付</option>
+              <option value="pending">待付</option>
+              <option value="free">免费</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>渠道码</label>
+            <input id="orderChannel" placeholder="P_XXX 或空" />
+          </div>
+          <div class="field">
+            <label>从</label>
+            <input id="orderFrom" type="date" />
+          </div>
+          <div class="field">
+            <label>到</label>
+            <input id="orderTo" type="date" />
+          </div>
+          <button type="button" id="btnLoadOrders">查询</button>
+          <button type="button" class="secondary" id="btnCsv">导出 CSV</button>
+        </div>
+        <div id="ordersTable"></div>
+        <div class="row" style="margin-top:12px;justify-content:space-between">
+          <p id="ordersMeta" class="sub" style="margin:0"></p>
+          <div class="row" id="ordersPager">
+            <button type="button" class="secondary" id="btnOrdersPrev">上一页</button>
+            <span id="ordersPageLabel" class="sub"></span>
+            <button type="button" class="secondary" id="btnOrdersNext">下一页</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-channels" class="card hidden">
+        <div id="channelsTable"></div>
+        <h3 style="margin:20px 0 8px;font-size:1rem">维护推广人</h3>
+        <div class="row">
+          <div class="field"><label>渠道码</label><input id="pCode" placeholder="P_ZHANGWENBO" /></div>
+          <div class="field"><label>姓名</label><input id="pName" placeholder="张文波" /></div>
+          <div class="field"><label>分成比例</label><input id="pRate" type="number" min="0" max="1" step="0.01" value="0.2" /></div>
+          <div class="field grow"><label>备注</label><input id="pNote" /></div>
+          <button type="button" id="btnSavePromoter">保存</button>
+        </div>
+        <p id="promoterMsg" class="ok hidden"></p>
+        <div id="promotersTable" style="margin-top:12px"></div>
+      </section>
+
+      <section id="tab-ops" class="card hidden">
+        <h3 style="margin-top:0;font-size:1rem">手动标已付</h3>
+        <div class="row">
+          <input id="markOrderId" class="grow" placeholder="order_id" />
+          <button type="button" id="btnMarkPaid">标记已付</button>
+        </div>
+        <h3 style="font-size:1rem">解绑设备</h3>
+        <div class="row">
+          <input id="unbindDevice" class="grow" placeholder="device_id" />
+          <input id="unbindLicense" class="grow" placeholder="license_id（可选）" />
+          <button type="button" class="danger" id="btnUnbind">解绑</button>
+        </div>
+        <h3 style="font-size:1rem">生成激活码</h3>
+        <div class="row">
+          <select id="codePlan">
+            <option value="month">月付</option>
+            <option value="year">年付</option>
+            <option value="lifetime">终身</option>
+          </select>
+          <button type="button" id="btnCreateCode">生成</button>
+        </div>
+        <p id="opsMsg" class="ok"></p>
+      </section>
+
+      <section id="tab-feedback" class="card hidden">
+        <div class="row" style="margin-bottom:12px">
+          <div class="field">
+            <label>邮件状态</label>
+            <select id="feedbackMailed">
+              <option value="">全部</option>
+              <option value="1">已发信</option>
+              <option value="0">未发信</option>
+            </select>
+          </div>
+          <button type="button" id="btnLoadFeedback">查询</button>
+        </div>
+        <p id="feedbackMeta" class="sub"></p>
+        <div id="feedbackTable"></div>
+        <div id="feedbackDetail" class="card" style="margin-top:12px;display:none">
+          <h3 style="margin-top:0;font-size:1rem">反馈详情</h3>
+          <p id="feedbackDetailMeta" class="sub"></p>
+          <div id="feedbackDetailBody" style="max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:12px;background:#fafafa"></div>
+          <button type="button" class="secondary" id="btnCloseFeedbackDetail" style="margin-top:10px">关闭详情</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const KEY = "license_admin_key";
+    const $ = (id) => document.getElementById(id);
+    const productLabel = (p) => (p === "zhouyi" ? "周易" : p === "yizhi" ? "易知" : p || "易知");
+    const planLabel = (p) => ({ month: "月付", year: "年付", lifetime: "终身" }[p] || p);
+
+    function adminBase() {
+      // /license/admin/ui → /license/admin
+      const u = new URL(".", window.location.href);
+      let path = u.pathname.replace(/\/$/, "");
+      if (path.endsWith("/ui")) path = path.slice(0, -3);
+      return path.replace(/\/$/, "") || "/admin";
+    }
+
+    function getKey() { return sessionStorage.getItem(KEY) || ""; }
+    function setKey(v) { sessionStorage.setItem(KEY, v); }
+    function clearKey() { sessionStorage.removeItem(KEY); }
+
+    async function api(path, opts = {}) {
+      const url = new URL(adminBase() + path, window.location.origin);
+      if (!opts.method || opts.method === "GET") {
+        url.searchParams.set("admin_key", getKey());
+        if (opts.query) {
+          Object.entries(opts.query).forEach(([k, v]) => {
+            if (v !== undefined && v !== null && String(v) !== "") url.searchParams.set(k, v);
+          });
+        }
+      }
+      const init = { method: opts.method || "GET", headers: {} };
+      if (opts.body) {
+        init.headers["Content-Type"] = "application/json";
+        init.body = JSON.stringify({ admin_key: getKey(), ...opts.body });
+      }
+      const res = await fetch(url.toString(), init);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.detail || data.message || ("HTTP " + res.status));
+      return data;
+    }
+
+    function showLogin(err) {
+      $("loginCard").classList.remove("hidden");
+      $("app").classList.add("hidden");
+      if (err) {
+        $("loginErr").textContent = err;
+        $("loginErr").classList.remove("hidden");
+      }
+    }
+
+    function showApp() {
+      $("loginCard").classList.add("hidden");
+      $("app").classList.remove("hidden");
+      $("loginErr").classList.add("hidden");
+    }
+
+    function productFilter() { return $("productFilter").value; }
+
+    function filterRevenueByProduct(stats) {
+      const pf = productFilter();
+      const total = stats.revenue_total || {};
+      if (!pf) return total;
+      const hit = (total.by_product || []).find((x) => x.product === pf);
+      return {
+        orders: hit ? hit.orders : 0,
+        revenue: hit ? hit.revenue : 0,
+        by_plan: (total.by_plan || []).filter(() => true),
+        by_product: hit ? [hit] : [],
+      };
+    }
+
+    async function loadOverview() {
+      const stats = await api("/stats", { query: { period: "month" } });
+      const pf = productFilter();
+      let paidOrders = stats.revenue_total.orders;
+      let paidRev = stats.revenue_total.revenue;
+      let pendingCount = stats.pending_orders.count;
+      let pendingAmt = stats.pending_orders.amount;
+      if (pf) {
+        const rp = (stats.revenue_total.by_product || []).find((x) => x.product === pf);
+        paidOrders = rp ? rp.orders : 0;
+        paidRev = rp ? rp.revenue : 0;
+        const pp = (stats.pending_orders_by_product || []).find((x) => x.product === pf);
+        pendingCount = pp ? pp.count : 0;
+        pendingAmt = pp ? pp.amount : 0;
+      }
+      $("overviewStats").innerHTML = `
+        <div class="stat"><div class="k">已付笔数${pf ? "（筛选）" : "（合计）"}</div><div class="v">${paidOrders}</div></div>
+        <div class="stat"><div class="k">已付金额</div><div class="v">¥${Number(paidRev).toFixed(2)}</div></div>
+        <div class="stat"><div class="k">待支付笔数</div><div class="v">${pendingCount}</div></div>
+        <div class="stat"><div class="k">待支付金额</div><div class="v">¥${Number(pendingAmt).toFixed(2)}</div></div>
+      `;
+      const byP = stats.revenue_total.by_product || [];
+      $("byProduct").innerHTML = byP.length
+        ? `<table><thead><tr><th>产品</th><th>笔数</th><th>金额</th></tr></thead><tbody>${
+            byP.map((r) => `<tr><td><span class="pill ${r.product}">${r.product_label}</span></td><td>${r.orders}</td><td>¥${Number(r.revenue).toFixed(2)}</td></tr>`).join("")
+          }</tbody></table>`
+        : "<p class='sub'>暂无已付订单</p>";
+      // 分套餐：若筛选产品则从订单接口粗算，否则用 stats
+      if (!pf) {
+        const byPlan = stats.revenue_total.by_plan || [];
+        $("byPlan").innerHTML = `<table><thead><tr><th>套餐</th><th>笔数</th><th>金额</th></tr></thead><tbody>${
+          byPlan.map((r) => `<tr><td>${r.plan_label}</td><td>${r.orders}</td><td>¥${Number(r.revenue).toFixed(2)}</td></tr>`).join("") || "<tr><td colspan=3>无</td></tr>"
+        }</tbody></table>`;
+      } else {
+        const o = await api("/orders", { query: { product: pf, status: "paid", limit: 500 } });
+        const map = {};
+        (o.orders || []).forEach((x) => {
+          map[x.plan] = map[x.plan] || { plan: x.plan, orders: 0, revenue: 0 };
+          map[x.plan].orders += 1;
+          map[x.plan].revenue += Number(x.amount || 0);
+        });
+        const rows = Object.values(map);
+        $("byPlan").innerHTML = `<table><thead><tr><th>套餐</th><th>笔数</th><th>金额</th></tr></thead><tbody>${
+          rows.map((r) => `<tr><td>${planLabel(r.plan)}</td><td>${r.orders}</td><td>¥${r.revenue.toFixed(2)}</td></tr>`).join("") || "<tr><td colspan=3>无</td></tr>"
+        }</tbody></table>`;
+      }
+    }
+
+    let lastOrders = [];
+    let ordersPage = 1;
+    const ORDERS_PAGE_SIZE = 10;
+    let ordersTotal = 0;
+
+    function statusLabel(s) {
+      if (s === "paid") return "已付";
+      if (s === "pending") return "待付";
+      if (s === "free") return "免费";
+      return s || "";
+    }
+
+    function orderActionsHtml(o) {
+      if (o.status !== "pending") return "";
+      const id = o.order_id;
+      return `
+        <button type="button" class="btn-sm" data-act="paid" data-id="${id}">标已付</button>
+        <button type="button" class="btn-sm btn-free" data-act="free" data-id="${id}">免费</button>
+        <button type="button" class="btn-sm danger" data-act="cancel" data-id="${id}">取消订单</button>`;
+    }
+
+    async function loadOrders(resetPage) {
+      if (resetPage) ordersPage = 1;
+      const offset = (ordersPage - 1) * ORDERS_PAGE_SIZE;
+      const data = await api("/orders", {
+        query: {
+          product: productFilter(),
+          status: $("orderStatus").value,
+          channel_code: $("orderChannel").value.trim().toUpperCase(),
+          date_from: $("orderFrom").value,
+          date_to: $("orderTo").value,
+          limit: ORDERS_PAGE_SIZE,
+          offset,
+        },
+      });
+      lastOrders = data.orders || [];
+      ordersTotal = Number(data.total || 0);
+      const pages = Math.max(1, Math.ceil(ordersTotal / ORDERS_PAGE_SIZE));
+      if (ordersPage > pages) {
+        ordersPage = pages;
+        return loadOrders(false);
+      }
+      $("ordersMeta").textContent =
+        `共 ${ordersTotal} 笔 · 每页 ${ORDERS_PAGE_SIZE} 条 · 第 ${ordersPage}/${pages} 页`;
+      $("ordersPageLabel").textContent = `${ordersPage} / ${pages}`;
+      $("btnOrdersPrev").disabled = ordersPage <= 1;
+      $("btnOrdersNext").disabled = ordersPage >= pages;
+      $("ordersTable").innerHTML = `
+        <table>
+          <thead><tr>
+            <th>订单</th><th>产品</th><th>套餐</th><th>金额</th><th>状态</th><th>渠道</th><th>时间</th><th>操作</th>
+          </tr></thead>
+          <tbody>
+            ${lastOrders.map((o) => `
+              <tr>
+                <td><code>${o.order_id}</code><div class="sub">${(o.device_id || "").slice(0, 12)}</div></td>
+                <td><span class="pill ${o.product}">${productLabel(o.product)}</span></td>
+                <td>${planLabel(o.plan)}</td>
+                <td>¥${Number(o.amount).toFixed(2)}</td>
+                <td>${statusLabel(o.status)}</td>
+                <td>${o.channel_code || "—"}</td>
+                <td>${o.paid_at || o.created_at || ""}</td>
+                <td class="actions">${orderActionsHtml(o)}</td>
+              </tr>`).join("") || "<tr><td colspan=8>无数据</td></tr>"}
+          </tbody>
+        </table>`;
+      $("ordersTable").querySelectorAll("[data-act]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-id");
+          const act = btn.getAttribute("data-act");
+          try {
+            if (act === "paid") {
+              await api("/mark-paid", { method: "POST", body: { order_id: id } });
+            } else if (act === "free") {
+              if (!confirm("确认将该订单设为免费？金额将改为 ¥0，并开通授权。")) return;
+              await api("/mark-free", { method: "POST", body: { order_id: id } });
+            } else if (act === "cancel") {
+              if (!confirm("确认取消并删除该待付订单？此操作不可恢复。")) return;
+              await api("/cancel-order", { method: "POST", body: { order_id: id } });
+            }
+            await loadOrders(false);
+          } catch (e) { alert(e.message); }
+        });
+      });
+    }
+
+    async function loadChannels() {
+      const data = await api("/channels", {
+        query: { product: productFilter(), status: "paid" },
+      });
+      const rows = data.channels || [];
+      $("channelsTable").innerHTML = `
+        <table>
+          <thead><tr>
+            <th>渠道</th><th>姓名</th><th>笔数</th><th>已付</th><th>分成</th><th>易知</th><th>周易</th>
+          </tr></thead>
+          <tbody>
+            ${rows.map((c) => `
+              <tr>
+                <td><code>${c.code}</code></td>
+                <td>${c.name || "—"}</td>
+                <td>${c.orders}</td>
+                <td>¥${Number(c.revenue).toFixed(2)}</td>
+                <td>¥${Number(c.commission).toFixed(2)} <span class="sub">(${(c.commission_rate * 100).toFixed(0)}%)</span></td>
+                <td>¥${Number(c.yizhi_revenue).toFixed(2)} / ${c.yizhi_orders}</td>
+                <td>¥${Number(c.zhouyi_revenue).toFixed(2)} / ${c.zhouyi_orders}</td>
+              </tr>`).join("") || "<tr><td colspan=7>暂无带渠道的已付订单</td></tr>"}
+          </tbody>
+        </table>`;
+      const pr = await api("/promoters");
+      const ps = pr.promoters || [];
+      $("promotersTable").innerHTML = `
+        <table><thead><tr><th>码</th><th>姓名</th><th>分成</th><th>备注</th></tr></thead>
+        <tbody>${ps.map((p) => `
+          <tr>
+            <td><code>${p.code}</code></td>
+            <td>${p.name}</td>
+            <td>${(Number(p.commission_rate) * 100).toFixed(0)}%</td>
+            <td>${p.note || ""}</td>
+          </tr>`).join("") || "<tr><td colspan=4>无</td></tr>"}</tbody></table>`;
+    }
+
+    function exportCsv() {
+      const lines = [["order_id", "product", "plan", "amount", "status", "channel_code", "device_id", "created_at", "paid_at"]];
+      lastOrders.forEach((o) => {
+        lines.push([o.order_id, o.product, o.plan, o.amount, o.status, o.channel_code || "", o.device_id || "", o.created_at || "", o.paid_at || ""]);
+      });
+      const csv = lines.map((r) => r.map((x) => `"${String(x).replace(/"/g, '""')}"`).join(",")).join("\n");
+      const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "orders.csv";
+      a.click();
+    }
+
+    let lastFeedback = [];
+
+    function plainFromHtml(html) {
+      const d = document.createElement("div");
+      d.innerHTML = html || "";
+      return (d.textContent || "").trim();
+    }
+
+    async function loadFeedback() {
+      const mailed = $("feedbackMailed").value;
+      const q = { limit: 100, offset: 0 };
+      if (mailed !== "") q.mailed = mailed;
+      const data = await api("/feedback", { query: q });
+      lastFeedback = data.items || [];
+      $("feedbackMeta").textContent = `共 ${data.total || 0} 条（有网提交已写入数据库）`;
+      $("feedbackTable").innerHTML = `
+        <table>
+          <thead><tr>
+            <th>时间</th><th>标题</th><th>联系</th><th>版本</th><th>发信</th><th></th>
+          </tr></thead>
+          <tbody>
+            ${lastFeedback.map((f, i) => `
+              <tr>
+                <td>${f.created_at || ""}</td>
+                <td>${(f.subject || "").slice(0, 40)}</td>
+                <td>${f.contact || "-"}</td>
+                <td>${f.app_version || "-"}</td>
+                <td>${f.mailed ? ("已发/" + (f.mail_method || "")) : ("未发" + (f.mail_error ? " · " + String(f.mail_error).slice(0, 24) : ""))}</td>
+                <td><button type="button" class="secondary" data-fb-i="${i}">查看</button></td>
+              </tr>`).join("") || "<tr><td colspan=6>暂无反馈</td></tr>"}
+          </tbody>
+        </table>`;
+      $("feedbackTable").querySelectorAll("[data-fb-i]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const f = lastFeedback[Number(btn.dataset.fbI)];
+          if (!f) return;
+          $("feedbackDetail").style.display = "block";
+          $("feedbackDetailMeta").textContent =
+            `${f.created_at || ""} · ${f.id || ""} · device=${f.device_id || "-"} · ip=${f.client_ip || "-"}`;
+          $("feedbackDetailBody").innerHTML = f.html || `<pre>${plainFromHtml(f.html)}</pre>`;
+        });
+      });
+    }
+
+    async function refresh() {
+      const tab = document.querySelector(".tabs button.active")?.dataset.tab || "overview";
+      if (tab === "overview") await loadOverview();
+      if (tab === "orders") await loadOrders(false);
+      if (tab === "channels") await loadChannels();
+      if (tab === "feedback") await loadFeedback();
+    }
+
+    $("baseHint").textContent = adminBase();
+
+    $("btnLogin").addEventListener("click", async () => {
+      setKey($("adminKey").value.trim());
+      try {
+        await api("/stats", { query: { period: "month" } });
+        showApp();
+        await refresh();
+      } catch (e) {
+        clearKey();
+        showLogin(e.message || "密钥无效");
+      }
+    });
+
+    $("btnLogout").addEventListener("click", () => { clearKey(); showLogin(); });
+    $("btnRefresh").addEventListener("click", () => refresh().catch((e) => alert(e.message)));
+    $("productFilter").addEventListener("change", () => {
+      ordersPage = 1;
+      refresh().catch((e) => alert(e.message));
+    });
+    $("btnLoadOrders").addEventListener("click", () => loadOrders(true).catch((e) => alert(e.message)));
+    $("btnCsv").addEventListener("click", exportCsv);
+    $("btnLoadFeedback")?.addEventListener("click", () => loadFeedback().catch((e) => alert(e.message)));
+    $("btnCloseFeedbackDetail")?.addEventListener("click", () => {
+      $("feedbackDetail").style.display = "none";
+    });
+    $("btnOrdersPrev").addEventListener("click", () => {
+      if (ordersPage > 1) {
+        ordersPage -= 1;
+        loadOrders(false).catch((e) => alert(e.message));
+      }
+    });
+    $("btnOrdersNext").addEventListener("click", () => {
+      const pages = Math.max(1, Math.ceil(ordersTotal / ORDERS_PAGE_SIZE));
+      if (ordersPage < pages) {
+        ordersPage += 1;
+        loadOrders(false).catch((e) => alert(e.message));
+      }
+    });
+
+    document.querySelectorAll(".tabs button").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        document.querySelectorAll(".tabs button").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        ["overview", "orders", "channels", "ops", "feedback"].forEach((t) => {
+          $("tab-" + t).classList.toggle("hidden", t !== btn.dataset.tab);
+        });
+        try { await refresh(); } catch (e) { alert(e.message); }
+      });
+    });
+
+    $("btnSavePromoter").addEventListener("click", async () => {
+      try {
+        await api("/promoters", {
+          method: "POST",
+          body: {
+            code: $("pCode").value.trim(),
+            name: $("pName").value.trim(),
+            commission_rate: Number($("pRate").value || 0.2),
+            note: $("pNote").value.trim(),
+          },
+        });
+        $("promoterMsg").textContent = "已保存";
+        $("promoterMsg").classList.remove("hidden");
+        await loadChannels();
+      } catch (e) { alert(e.message); }
+    });
+
+    $("btnMarkPaid").addEventListener("click", async () => {
+      try {
+        await api("/mark-paid", { method: "POST", body: { order_id: $("markOrderId").value.trim() } });
+        $("opsMsg").textContent = "已标记支付";
+      } catch (e) { $("opsMsg").textContent = e.message; }
+    });
+    $("btnUnbind").addEventListener("click", async () => {
+      try {
+        await api("/unbind", {
+          method: "POST",
+          body: {
+            device_id: $("unbindDevice").value.trim(),
+            license_id: $("unbindLicense").value.trim(),
+          },
+        });
+        $("opsMsg").textContent = "已解绑";
+      } catch (e) { $("opsMsg").textContent = e.message; }
+    });
+    $("btnCreateCode").addEventListener("click", async () => {
+      try {
+        const r = await api("/create-code", { method: "POST", body: { plan: $("codePlan").value } });
+        $("opsMsg").textContent = "激活码: " + r.code;
+      } catch (e) { $("opsMsg").textContent = e.message; }
+    });
+
+    if (getKey()) {
+      api("/stats", { query: { period: "month" } })
+        .then(() => { showApp(); return refresh(); })
+        .catch(() => { clearKey(); showLogin(); });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+# 易知安装包 / 生产运行时最小依赖（勿加开发/OCR/Playwright 等）
+# 构建：build-portable.ps1 仅 pip install 本文件
+
+# API
+fastapi>=0.115.0
+uvicorn>=0.32.0
+python-multipart>=0.0.12
+
+# 配置与 Markdown
+pyyaml>=6.0
+markdown>=3.5
+
+# 文档导入（产品主路径）
+pypdf>=5.0.0
+pdfplumber>=0.11.0
+pymupdf>=1.24.0
+numpy>=1.26.0
+onnxruntime>=1.17.0
+python-docx>=1.1.0
+python-pptx>=1.0.0
+openpyxl>=3.1.0
+xlrd>=2.0.0
+
+# 图片与音频元数据
+Pillow>=10.0.0
+mutagen>=1.47.0
