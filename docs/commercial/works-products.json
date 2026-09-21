@@ -1,0 +1,58 @@
+[
+  {
+    "id": "yizhi",
+    "kicker": "Myknowledge · v3.2.0",
+    "name": "易知",
+    "tagline": "自我进化的本地知识库：翻到出处才回答，翻不到就拒答。",
+    "feats": [
+      "PDF / Office / 网页 / 音视频一室入库，外联目录只读不搬迁",
+      "关键词 + 向量混合检索，脚注落到页码与段落",
+      "库内证据不足时明确拒答，不拿模型瞎补",
+      "优质问答与文稿可回写，库越用越厚"
+    ],
+    "shot": "works-assets/yizhi.png",
+    "download": "https://www.yzwhysxx.cn/yizhi/Yizhi-Setup-3.2.0.zip"
+  },
+  {
+    "id": "zhouyi",
+    "kicker": "Book of Changes · v2.0.4",
+    "name": "周易卦象",
+    "tagline": "起卦解卦、每日一签、八字紫微；以卦观心，不作宿命宣判。",
+    "feats": [
+      "每日一签：六段仪式动画、时令用典解签、签图/动图与重现抽签",
+      "签主档案：按日补充说明（一日一条、写完不可改），抽签当日有则联想",
+      "解卦、每日一签、命理，互动起卦与流式解卦，不替人决断去留",
+      "本机八字、紫微十二宫排盘，Windows 安装包开箱即用"
+    ],
+    "shot": "works-assets/zhouyi.png",
+    "download": "https://www.yzwhysxx.cn/yizhi/Zhouyi-Setup-2.0.4.zip"
+  },
+  {
+    "id": "yiketang",
+    "kicker": "YiKeTang · v1.0.0",
+    "name": "易课堂",
+    "tagline": "本机 AI 备课：对话写出能上课的交互课件与练习；机房用 YwsLab 选班收卷，数据留在教师机。",
+    "feats": [
+      "锚定 2022 课标原文与教材目录，编号对不上就明说，不杜撰",
+      "一屏授课 + 独立练习，可配场景图与知识图谱，校验通过再交付",
+      "机房 YwsLab：课目录自带 exe 与 student.xlsx，选班、提问、交卷写回本课成绩",
+      "班级花名册同步、校教案 Word 导出；Windows 安装即用"
+    ],
+    "shot": "works-assets/yiketang-ui.png",
+    "download": "https://www.yzwhysxx.cn/yizhi/YiKeTang-Setup-1.0.0.zip"
+  },
+  {
+    "id": "easypage",
+    "kicker": "EasyPage · Portable",
+    "name": "易页 EasyPage",
+    "tagline": "本地起始页：常用站一页收齐，数据在文件夹里，拷走即带走。",
+    "feats": [
+      "托盘常驻，关窗不退出",
+      "SQLite + 图标随目录迁移",
+      "无需安装、无需管理员权限",
+      "一页收齐常用网站，搜索直达"
+    ],
+    "shot": "works-assets/easypage.png",
+    "download": "https://www.yzwhysxx.cn/yizhi/easypage.zip"
+  }
+]

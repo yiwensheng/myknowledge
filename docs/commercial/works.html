@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- 提示浏览器勿长期缓存；CDN 仍以源站 HTTP 头为准，见 yizhi-web/web.config -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="description" content="易文胜桌面作品：易知、周易卦象、易页 EasyPage。本地优先，安装即用。" />
+  <title>易文胜 · 作品介绍</title>
+  <style>
+    :root {
+      --bg: #eef1f4;
+      --bg-deep: #e2e7ed;
+      --ink: #12151a;
+      --ink-soft: #3d4654;
+      --mute: #6b7585;
+      --line: color-mix(in srgb, var(--ink) 10%, transparent);
+      --surface: #f7f9fb;
+      --accent: #0d7a6f;
+      --accent-2: #147a9e;
+      --radius: 14px;
+      --shadow: 0 18px 50px color-mix(in srgb, #0a1620 14%, transparent);
+      --font: "Segoe UI Variable", "Segoe UI", "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+      --display: "Segoe UI Variable Display", "Segoe UI", "PingFang SC", "Microsoft YaHei UI", sans-serif;
+      --mono: ui-monospace, "Cascadia Code", "Sarasa Mono SC", Consolas, monospace;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      --nav-h: 64px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1318;
+        --bg-deep: #0a0d12;
+        --ink: #eef2f6;
+        --ink-soft: #c2cad6;
+        --mute: #8b95a5;
+        --line: color-mix(in srgb, #fff 12%, transparent);
+        --surface: #161b22;
+        --accent: #2ec4b6;
+        --accent-2: #4eb3d4;
+        --shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.65;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; height: auto; }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      pointer-events: none;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    .orb {
+      position: fixed;
+      width: 42vw;
+      height: 42vw;
+      max-width: 640px;
+      max-height: 640px;
+      border-radius: 50%;
+      filter: blur(72px);
+      opacity: 0.45;
+      pointer-events: none;
+      z-index: 0;
+      will-change: transform;
+    }
+    .orb-a {
+      top: -12%;
+      right: -8%;
+      background: radial-gradient(circle, color-mix(in srgb, var(--accent) 55%, transparent), transparent 70%);
+    }
+    .orb-b {
+      bottom: 10%;
+      left: -16%;
+      background: radial-gradient(circle, color-mix(in srgb, var(--accent-2) 45%, transparent), transparent 70%);
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      width: min(1180px, calc(100% - 2rem));
+      margin-inline: auto;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      height: var(--nav-h);
+      backdrop-filter: blur(16px) saturate(140%);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      background: color-mix(in srgb, var(--bg) 78%, transparent);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .brand-mark {
+      width: 0.7rem;
+      height: 0.7rem;
+      border-radius: 3px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      transform: translateY(-0.05em);
+    }
+    .brand-name { font-size: 1.05rem; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      font-size: 0.92rem;
+      color: var(--ink-soft);
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-cta {
+      padding: 0.45rem 0.9rem;
+      border-radius: 10px;
+      background: var(--ink);
+      color: var(--bg);
+      font-weight: 600;
+      transition: transform 0.2s var(--ease), opacity 0.2s;
+    }
+    .nav-cta:hover { transform: translateY(-1px); }
+    .nav-cta:active { transform: translateY(1px) scale(0.98); }
+
+    @media (max-width: 640px) {
+      .nav-links .hide-sm { display: none; }
+    }
+
+    .hero {
+      min-height: calc(100dvh - var(--nav-h));
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      align-items: center;
+      gap: clamp(1.5rem, 4vw, 3.5rem);
+      padding: clamp(1.25rem, 3vw, 2.5rem) 0 clamp(2.5rem, 6vw, 4rem);
+    }
+    .hero-copy { max-width: 36rem; }
+    .hero h1 {
+      font-family: var(--display);
+      font-size: clamp(2.4rem, 5.6vw, 4.4rem);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      margin: 0 0 1rem;
+      font-weight: 750;
+    }
+    .hero h1 em {
+      font-style: italic;
+      color: var(--accent);
+      font-weight: 650;
+    }
+    .hero-lead {
+      margin: 0 0 1.75rem;
+      font-size: clamp(1rem, 1.5vw, 1.125rem);
+      color: var(--ink-soft);
+      max-width: 32ch;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.85rem 1.25rem;
+      border-radius: 12px;
+      font-weight: 650;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+      transition: transform 0.2s var(--ease), background 0.2s, border-color 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .btn:active { transform: translateY(1px) scale(0.98); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
+      box-shadow: 0 10px 28px color-mix(in srgb, var(--accent) 35%, transparent);
+    }
+    .btn-primary:hover { filter: brightness(1.05); transform: translateY(-1px); }
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--line);
+      color: var(--ink);
+    }
+    .btn-ghost:hover {
+      border-color: color-mix(in srgb, var(--accent) 50%, var(--line));
+      color: var(--accent);
+    }
+
+    .hero-stage {
+      position: relative;
+      border-radius: calc(var(--radius) + 6px);
+      overflow: hidden;
+      background:
+        linear-gradient(160deg, color-mix(in srgb, var(--surface) 88%, var(--accent)), var(--surface));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      isolation: isolate;
+      padding: 1.1rem;
+    }
+    .hero-stage::before {
+      content: "";
+      position: absolute;
+      inset: -20%;
+      background:
+        radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--accent) 40%, transparent), transparent 45%),
+        radial-gradient(circle at 80% 70%, color-mix(in srgb, var(--accent-2) 35%, transparent), transparent 40%);
+      animation: drift 14s ease-in-out infinite alternate;
+      z-index: 0;
+    }
+    .hero-grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(color-mix(in srgb, var(--ink) 8%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--ink) 8%, transparent) 1px, transparent 1px);
+      background-size: 36px 36px;
+      mask-image: radial-gradient(circle at 50% 40%, #000 20%, transparent 75%);
+      opacity: 0.45;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .hero-pills {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.7rem;
+    }
+    .hero-pill {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.2rem;
+      min-height: 5.4rem;
+      padding: 0.95rem 1rem;
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--surface) 88%, transparent);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 8px 24px color-mix(in srgb, #000 8%, transparent);
+      transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s;
+    }
+    .hero-pill:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+      box-shadow: var(--shadow);
+    }
+    .hero-pill strong {
+      font-size: 0.98rem;
+      line-height: 1.2;
+    }
+    .hero-pill span {
+      font-size: 0.78rem;
+      color: var(--mute);
+      line-height: 1.35;
+    }
+    .hero-pill.more {
+      align-items: center;
+      text-align: center;
+      color: var(--mute);
+      border-style: dashed;
+      background: color-mix(in srgb, var(--surface) 55%, transparent);
+    }
+    .hero-pill.more strong {
+      font-size: 1.6rem;
+      letter-spacing: 0.12em;
+      color: var(--ink-soft);
+      font-weight: 600;
+    }
+    .hero-pill.more span { font-size: 0.72rem; }
+
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to { transform: translate(-4%, 5%) scale(1.08); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .orb, .hero-stage::before { animation: none !important; }
+      html { scroll-behavior: auto; }
+      .reveal { opacity: 1 !important; transform: none !important; }
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
+        padding-top: 1.5rem;
+      }
+      .hero-stage { order: -1; }
+      .hero-lead { max-width: 42ch; }
+    }
+
+    .section {
+      padding: clamp(3rem, 8vw, 5.5rem) 0;
+    }
+    .section-head {
+      margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+      max-width: 40rem;
+    }
+    .section-head h2 {
+      margin: 0 0 0.6rem;
+      font-size: clamp(1.6rem, 3.2vw, 2.35rem);
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+    .section-head p {
+      margin: 0;
+      color: var(--ink-soft);
+      max-width: 48ch;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      align-items: stretch;
+    }
+    .product {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      height: 100%;
+      padding: 0;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      transition: transform 0.35s var(--ease), border-color 0.35s, box-shadow 0.35s;
+    }
+    .product:hover {
+      transform: translateY(-4px);
+      border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+      box-shadow: var(--shadow);
+    }
+    .product-shot {
+      aspect-ratio: 16 / 10;
+      overflow: hidden;
+      background: #0d1218;
+      border-bottom: 1px solid var(--line);
+    }
+    .product-shot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+    }
+    .product-body {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      padding: 1.15rem 1.15rem 1.2rem;
+    }
+    .product-kicker {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--mute);
+      letter-spacing: 0.04em;
+      margin-bottom: 0.45rem;
+    }
+    .product h3 {
+      margin: 0 0 0.45rem;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    .product-tagline {
+      margin: 0 0 0.95rem;
+      color: var(--ink-soft);
+      font-size: 0.92rem;
+      min-height: 3.2em;
+    }
+    .feats {
+      list-style: none;
+      margin: 0 0 1.15rem;
+      padding: 0;
+      display: grid;
+      gap: 0.4rem;
+      flex: 1;
+    }
+    .feats li {
+      display: grid;
+      grid-template-columns: 0.55rem 1fr;
+      gap: 0.55rem;
+      align-items: start;
+      font-size: 0.88rem;
+      color: var(--ink-soft);
+    }
+    .feats li::before {
+      content: "";
+      width: 0.45rem;
+      height: 0.45rem;
+      margin-top: 0.42rem;
+      border-radius: 2px;
+      background: var(--accent);
+    }
+    .product-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-top: auto;
+      align-items: center;
+    }
+    .btn-sm { padding: 0.65rem 1rem; font-size: 0.88rem; border-radius: 10px; }
+    .btn-download {
+      background: var(--ink);
+      color: var(--bg);
+    }
+    .btn-download:hover { opacity: 0.92; transform: translateY(-1px); }
+    .meta {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--mute);
+    }
+
+    @media (max-width: 980px) {
+      .product-grid { grid-template-columns: 1fr; }
+      .product-tagline { min-height: 0; }
+    }
+
+    footer {
+      padding: 2.5rem 0 3rem;
+      color: var(--mute);
+      font-size: 0.9rem;
+    }
+    .foot-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: flex-end;
+      border-top: 1px solid var(--line);
+      padding-top: 1.5rem;
+    }
+    .foot-links { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .foot-links a:hover { color: var(--accent); }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+    }
+    .reveal.in {
+      opacity: 1;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="orb orb-a" aria-hidden="true"></div>
+  <div class="orb orb-b" aria-hidden="true"></div>
+
+  <header class="nav">
+    <div class="shell nav-inner">
+      <a class="brand" href="#top" aria-label="易文胜作品">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-name">易文胜</span>
+      </a>
+      <nav class="nav-links" aria-label="主导航">
+        <a class="hide-sm" href="#works">作品</a>
+        <a class="hide-sm" href="faq.html">FAQ</a>
+        <a class="nav-cta" href="#works">浏览下载</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="shell hero">
+      <div class="hero-copy">
+        <h1>本地优先的<br /><em>桌面工具</em></h1>
+        <p class="hero-lead">资料、卦象、课件、起始页，都跑在你自己的机器上。装上就能用，数据跟着你走。</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#works">查看作品</a>
+          <a class="btn btn-ghost" href="changelog.html">更新记录</a>
+        </div>
+      </div>
+      <div class="hero-stage">
+        <div class="hero-grid-bg" aria-hidden="true"></div>
+        <div class="hero-pills" aria-label="作品速览">
+          <a class="hero-pill" href="#yizhi">
+            <strong>易知</strong>
+            <span>有出处才开口</span>
+          </a>
+          <a class="hero-pill" href="#zhouyi">
+            <strong>周易卦象</strong>
+            <span>以卦观心</span>
+          </a>
+          <a class="hero-pill" href="#yiketang">
+            <strong>易课堂</strong>
+            <span>机房也能收卷</span>
+          </a>
+          <a class="hero-pill" href="#easypage">
+            <strong>易页</strong>
+            <span>书签跟文件夹走</span>
+          </a>
+          <a class="hero-pill more" href="#works" aria-label="更多作品即将到来">
+            <strong>……</strong>
+            <span>更多作品</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="shell section" id="works">
+      <div class="section-head reveal">
+        <h2>作品</h2>
+        <p>四款已上线。点下载直接拿安装包。</p>
+      </div>
+      <div class="product-grid" id="product-grid"></div>
+    </section>
+  </main>
+
+  <footer class="shell">
+    <div class="foot-row">
+      <div>
+        <strong style="color:var(--ink)">易文胜</strong>
+        <div>桌面作品集 · 2026</div>
+      </div>
+      <div class="foot-links">
+        <a href="faq.html">常见问题</a>
+        <a href="changelog.html">更新记录</a>
+        <a href="https://github.com/yiwensheng/myknowledge" rel="noopener" target="_blank">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /** 产品数据在 works-products.json；每次加载带时间戳，绕过 CDN 对 JSON 的长缓存（无需 Purge 权限）。 */
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+    function escapeAttr(s) {
+      return escapeHtml(s).replace(/'/g, "&#39;");
+    }
+
+    function shotUrl(shot) {
+      // 相对路径预览图：附带短缓存戳，避免 CDN 把错误 Content-Type / 旧字节粘死
+      if (!shot || /^https?:\/\//i.test(shot) || shot.includes("?")) return shot;
+      return shot + "?v=20260921";
+    }
+
+    function renderProducts(products) {
+      const grid = document.getElementById("product-grid");
+      grid.innerHTML = products.map((p, i) => {
+        const feats = p.feats.map((f) => `<li>${escapeHtml(f)}</li>`).join("");
+        return `
+          <article class="product reveal" id="${escapeAttr(p.id)}" style="transition-delay:${i * 0.06}s">
+            <div class="product-shot">
+              <img src="${escapeAttr(shotUrl(p.shot))}" alt="${escapeAttr(p.name)} 界面预览" width="1280" height="800" loading="lazy" />
+            </div>
+            <div class="product-body">
+              <div class="product-kicker">${escapeHtml(p.kicker)}</div>
+              <h3>${escapeHtml(p.name)}</h3>
+              <p class="product-tagline">${escapeHtml(p.tagline)}</p>
+              <ul class="feats">${feats}</ul>
+              <div class="product-actions">
+                <a class="btn btn-download btn-sm" href="${escapeAttr(p.download)}">下载安装包</a>
+                <span class="meta">Win64</span>
+              </div>
+            </div>
+          </article>`;
+      }).join("");
+      initReveal();
+    }
+
+    function showProductLoadError() {
+      document.getElementById("product-grid").innerHTML =
+        '<p class="muted" style="grid-column:1/-1;padding:1rem 0">作品列表加载失败，请稍后刷新或检查网络。</p>';
+    }
+
+    function loadProducts() {
+      const url = "works-products.json?_=" + Date.now();
+      fetch(url, { cache: "no-store" })
+        .then((r) => {
+          if (!r.ok) throw new Error(String(r.status));
+          return r.json();
+        })
+        .then(renderProducts)
+        .catch(showProductLoadError);
+    }
+
+    function initReveal() {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!reduce) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                e.target.classList.add("in");
+                io.unobserve(e.target);
+              }
+            });
+          },
+          { threshold: 0.18, rootMargin: "0px 0px -8% 0px" }
+        );
+        document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+
+        const orbs = document.querySelectorAll(".orb");
+        let mx = 0, my = 0, rx = 0, ry = 0;
+        window.addEventListener(
+          "pointermove",
+          (e) => {
+            mx = (e.clientX / window.innerWidth - 0.5) * 24;
+            my = (e.clientY / window.innerHeight - 0.5) * 18;
+          },
+          { passive: true }
+        );
+        (function tick() {
+          rx += (mx - rx) * 0.06;
+          ry += (my - ry) * 0.06;
+          orbs[0] && (orbs[0].style.transform = `translate(${rx}px, ${ry}px)`);
+          orbs[1] && (orbs[1].style.transform = `translate(${-rx * 0.7}px, ${-ry * 0.7}px)`);
+          requestAnimationFrame(tick);
+        })();
+      } else {
+        document.querySelectorAll(".reveal").forEach((el) => el.classList.add("in"));
+      }
+    }
+
+    loadProducts();
+  </script>
+</body>
+</html>
